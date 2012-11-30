@@ -18,6 +18,7 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.openmrs.module:htmlwidgets:1.6.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.openmrs.module:logic-api:0.5.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.codehaus.groovy:groovy-all:1.7.6" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.openmrs.module:calculation-api:1.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.openmrs.module:serialization.xstream-api:0.2.7" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.openmrs.api:openmrs-api:1.8.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: commons-collections:commons-collections:3.2" level="project" />
