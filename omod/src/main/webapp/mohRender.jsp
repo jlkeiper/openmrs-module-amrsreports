@@ -139,24 +139,6 @@
 	<form method="POST" name="amrsreportrenderer" action="mohRender.form">
 		<table>
 			<tr>
-				<td><b>Reports:</b></td>
-				<td><select name="definition" onchange="clearDataTable()">
-						<c:forEach var="rptdefinition" items="${reportDefinitions}">
-							<option  value="${rptdefinition.uuid}" >${rptdefinition.name}</option>
-						</c:forEach>
-					</select>
-				</td>
-			</tr>
-			<tr>
-				<td><b>Cohorts:</b></td>
-				<td><select name="cohortdef" onchange="clearDataTable()">
-						<c:forEach var="cohortdefinition" items="${cohortdefinitions}">
-							<option  value="${cohortdefinition.uuid}" >${cohortdefinition.name}</option>
-						</c:forEach>
-					</select>
-				</td>
-			</tr>
-			<tr>
 				<td><b>Location:</b></td>
 				<td><select name="location" onchange="clearDataTable()">
 						<c:forEach var="location" items="${location}" >
@@ -165,7 +147,15 @@
 					</select>
 				</td>
 			</tr>
-			<tr>
+            <tr>
+                <td><b>Built-in Reports:</b></td>
+                <td><select name="hardcoded" onchange="clearDataTable()">
+                    <option value="" selected> </option>
+                    <option value="ack">MOH 361A</option>
+                </select>
+                </td>
+            </tr>
+            <tr>
 				<td>&nbsp;</td>
 				<td>
 					<input type="submit" value="View" />
