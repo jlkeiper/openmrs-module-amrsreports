@@ -12,12 +12,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -30,16 +27,15 @@ import org.openmrs.Location;
 import org.openmrs.User;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.amrsreport.cohort.definition.MohCohortDefinition;
+import org.openmrs.module.amrsreport.cohort.definition.Moh361ACohortDefinition;
 import org.openmrs.module.amrsreport.render.AmrReportRender;
 import org.openmrs.module.amrsreport.reports.MOH361AReport;
 import org.openmrs.module.amrsreport.service.MohCoreService;
+import org.openmrs.module.amrsreport.util.ReportUtil;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
-import org.openmrs.module.reporting.dataset.definition.DataSetDefinition;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
-import org.openmrs.module.reporting.evaluation.parameter.Mapped;
 import org.openmrs.module.reporting.report.ReportData;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
@@ -66,16 +62,6 @@ public class MohRenderController {
 
 		MohCoreService mohCoreService = Context.getService(MohCoreService.class);
 
-//		CohortDefinitionService cohortDefinitionService = Context.getService(CohortDefinitionService.class);
-//		// Get list of existing reports
-//		boolean includeRet = (includeRetired == Boolean.TRUE);
-//		List<ReportDefinition> reportDefinitions = Context.getService(ReportDefinitionService.class).getAllDefinitions(includeRet);
-//
-//		map.addAttribute("reportDefinitions", reportDefinitions);
-//
-//		List<CohortDefinition> listOfCohorts = cohortDefinitionService.getAllDefinitions(false);
-//		map.addAttribute("cohortdefinitions", listOfCohorts);
-
 		//get a list of all the locations
 		User currUser = Context.getAuthenticatedUser();
 		List<Location> locationList = mohCoreService.getAllowedLocationsForUser(currUser);
@@ -87,6 +73,7 @@ public class MohRenderController {
 	public void processForm(ModelMap map, HttpServletRequest request,
 	                        @RequestParam(required = false, value = "definition") String definitionuuid,
 	                        @RequestParam(required = false, value = "cohortdef") String cohortdefuuid,
+	                        @RequestParam("evaluationDate") Date evaluationDate,
 	                        @RequestParam("location") Integer location,
 	                        @RequestParam("hardcoded") String hardcoded) {
 
@@ -101,7 +88,7 @@ public class MohRenderController {
 
 		// use a hardcoded report if indicated
 		if (StringUtils.isNotBlank(hardcoded)) {
-			cohortDefinition = new MohCohortDefinition();
+			cohortDefinition = new Moh361ACohortDefinition();
 			reportDefinition = MOH361AReport.getReportDefinition();
 		}
 
@@ -109,25 +96,15 @@ public class MohRenderController {
 		try {
 			EvaluationContext evaluationContext = new EvaluationContext();
 
-			// add location to be displayed here
+			// set up evaluation context values
 			evaluationContext.addParameterValue("locationList", Arrays.asList(loc));
+			evaluationContext.addParameterValue("endDate", evaluationDate);
+			evaluationContext.setEvaluationDate(evaluationDate);
 
-			// evaluation
+			// get the cohort
 			CohortDefinitionService cohortDefinitionService = Context.getService(CohortDefinitionService.class);
 			Cohort cohort = cohortDefinitionService.evaluate(cohortDefinition, evaluationContext);
-			log.warn("cohort size: " + cohort.size());
-
-			// slice it down to just the first 100 ... temporary!!!
-			int i = 0;
-			Cohort newCohort = new Cohort();
-			Iterator<Integer> it = cohort.getMemberIds().iterator();
-			while (it.hasNext() && i < 100) {
-				newCohort.addMember(it.next());
-				i++;
-			}
-			log.warn("new cohort size: " + newCohort.size());
-
-			evaluationContext.setBaseCohort(newCohort);
+			evaluationContext.setBaseCohort(cohort);
 
 			Date d = Calendar.getInstance().getTime();
 			String TIME;
@@ -141,10 +118,8 @@ public class MohRenderController {
 
 			File loaddir = OpenmrsUtil.getDirectoryInApplicationDataDirectory(folderName);
 
-			ReportDefinitionService reportDefinitionService = Context.getService(ReportDefinitionService.class);
-
 			log.warn("STARTING");
-			ReportData reportData = reportDefinitionService.evaluate(reportDefinition, evaluationContext);
+			ReportData reportData = ReportUtil.evaluate(reportDefinition, evaluationContext);
 			log.warn("DONE");
 
 			//create a flat file here for storing our report data
@@ -213,12 +188,6 @@ public class MohRenderController {
 		}
 
 		// populate model for reloading of screen
-
-//		List<CohortDefinition> listOfCohorts = Context.getService(CohortDefinitionService.class).getAllDefinitions(false);
-//		map.addAttribute("cohortdefinitions", listOfCohorts);
-
-//		List<ReportDefinition> reportDefinitions = Context.getService(ReportDefinitionService.class).getAllDefinitions(true);
-//		map.addAttribute("reportDefinitions", reportDefinitions);
 
 		MohCoreService mohCoreService = Context.getService(MohCoreService.class);
 		User currUser = Context.getAuthenticatedUser();

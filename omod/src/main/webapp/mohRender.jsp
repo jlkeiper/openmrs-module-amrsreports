@@ -28,6 +28,8 @@
 	}
 </style>
 <script type="text/javascript">
+    var evaluationDate;
+
 	$j(document).ready(function(){
 
 		var ty = $j('#tblMain').dataTable({
@@ -78,7 +80,8 @@
 			return false;
 		});
 
-	});
+        evaluationDate = new DatePicker("<openmrs:datePattern/>", "evaluationDate", { defaultDate: new Date() });
+    });
 
 	function clearDataTable(){
 		//alert("on change has to take effect");
@@ -138,7 +141,11 @@
 <div class="box" style=" width:99%; height:auto;  overflow-x: auto;">
 	<form method="POST" name="amrsreportrenderer" action="mohRender.form">
 		<table>
-			<tr>
+            <tr>
+                <td><b>Evaluation Date:</b></td>
+                <td><input id="evaluationDate" name="evaluationDate" type="text"/></td>
+            </tr>
+            <tr>
 				<td><b>Location:</b></td>
 				<td><select name="location" onchange="clearDataTable()">
 						<c:forEach var="location" items="${location}" >
