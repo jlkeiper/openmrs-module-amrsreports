@@ -7,6 +7,7 @@
 <openmrs:htmlInclude file="/dwr/interface/DWRAmrsReportService.js"/>
 
 <script type="text/javascript">
+    var evaluationDate;
 
     $j(document).ready(function () {
 
@@ -50,9 +51,7 @@
             });
         });
 
-        $j("#evaluationDate").datepicker();
-        $j("#evaluationDate").datepicker("setDate", new Date());
-        $j("#evaluationDate").datepicker("refresh");
+        evaluationDate = new DatePicker("<openmrs:datePattern/>", "evaluationDate", { defaultDate: new Date() });
     });
 
     function getLocationCount(locationId, callback) {
