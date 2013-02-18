@@ -73,10 +73,10 @@ public class MOH361AReport {
 //		// h. Confirmed HIV+ Date
 //		dsd.addColumn("Confirmed HIV+ Date", columnB, null);
 //
-		// i. PEP Start / Stop Date
-		LogicDataDefinition columnI = new LogicDataDefinition();
-		columnI.setLogicQuery("\"MOH PEP Start Stop Date\"");
-		dsd.addColumn("PEP Start / Stop Date", columnI, null);
+//		// i. PEP Start / Stop Date
+//		LogicDataDefinition columnI = new LogicDataDefinition();
+//		columnI.setLogicQuery("\"MOH PEP Start Stop Date\"");
+//		dsd.addColumn("PEP Start / Stop Date", columnI, null);
 //
 //		// j. Reasons for PEP use:
 //		LogicDataDefinition columnJ = new LogicDataDefinition();
