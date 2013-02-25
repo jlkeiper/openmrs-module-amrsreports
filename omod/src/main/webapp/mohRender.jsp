@@ -81,6 +81,8 @@
 		});
 
         evaluationDate = new DatePicker("<openmrs:datePattern/>", "evaluationDate", { defaultDate: new Date() });
+        evaluationDate.setDate(new Date());
+        evaluationDate.refresh();
     });
 
 	function clearDataTable(){
@@ -157,7 +159,7 @@
             <tr>
                 <td><b>Built-in Reports:</b></td>
                 <td><select name="hardcoded" onchange="clearDataTable()">
-                    <option value="" selected> </option>
+                    <!-- <option value="" selected> </option> -->
                     <option value="ack">MOH 361A</option>
                 </select>
                 </td>
