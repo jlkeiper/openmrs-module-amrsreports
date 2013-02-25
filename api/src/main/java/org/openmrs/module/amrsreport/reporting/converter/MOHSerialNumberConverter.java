@@ -1,4 +1,4 @@
-package org.openmrs.module.amrsreport.reports.converter;
+package org.openmrs.module.amrsreport.reporting.converter;
 
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.PatientIdentifier;

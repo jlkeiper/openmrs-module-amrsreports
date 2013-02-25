@@ -1,26 +1,27 @@
-package org.openmrs.module.amrsreport.reports;
+package org.openmrs.module.amrsreport.reporting;
 
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.amrsreport.cache.MohCacheUtils;
-import org.openmrs.module.amrsreport.reports.converter.MOHPersonNameConverter;
-import org.openmrs.module.amrsreport.reports.converter.MOHSerialNumberConverter;
+import org.openmrs.module.amrsreport.reporting.converter.DecimalAgeConverter;
+import org.openmrs.module.amrsreport.reporting.converter.MOHPersonNameConverter;
+import org.openmrs.module.amrsreport.reporting.converter.MOHSerialNumberConverter;
+import org.openmrs.module.amrsreport.reporting.converter.WHOStageAndDateConverter;
+import org.openmrs.module.amrsreport.reporting.data.EnrollmentDateDataDefinition;
+import org.openmrs.module.amrsreport.reporting.data.WHOStageAndDateDataDefinition;
 import org.openmrs.module.amrsreport.rule.MohEvaluableNameConstants;
 import org.openmrs.module.amrsreport.rule.util.MohRuleUtils;
-import org.openmrs.module.reporting.data.converter.AgeConverter;
+import org.openmrs.module.reporting.data.MappedData;
 import org.openmrs.module.reporting.data.converter.BirthdateConverter;
 import org.openmrs.module.reporting.data.converter.DateConverter;
-import org.openmrs.module.reporting.data.converter.ListConverter;
-import org.openmrs.module.reporting.data.converter.ObjectFormatter;
-import org.openmrs.module.reporting.data.converter.PropertyConverter;
-import org.openmrs.module.reporting.data.converter.StringConverter;
 import org.openmrs.module.reporting.data.patient.definition.LogicDataDefinition;
 import org.openmrs.module.reporting.data.patient.definition.PatientIdentifierDataDefinition;
-import org.openmrs.module.reporting.data.person.definition.AgeDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.AgeAtDateOfOtherDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.BirthdateDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.GenderDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.PersonAttributeDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.PersonIdDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.PreferredNameDataDefinition;
 import org.openmrs.module.reporting.dataset.definition.PatientDataSetDefinition;
 import org.openmrs.module.reporting.report.definition.PeriodIndicatorReportDefinition;
@@ -33,6 +34,10 @@ public class MOH361AReport {
 
 	public static ReportDefinition getReportDefinition() {
 
+		String nullString = null;
+
+		DateConverter commonDateConverter = new DateConverter(MohRuleUtils.DATE_FORMAT);
+
 		ReportDefinition report = new PeriodIndicatorReportDefinition();
 		report.setName("MOH 361A Report");
 
@@ -40,59 +45,70 @@ public class MOH361AReport {
 		PatientDataSetDefinition dsd = new PatientDataSetDefinition();
 		dsd.setName("MOH 361A Data Set Definition");
 
+		// patient id ... until we get this thing working proper
+		dsd.addColumn("Person ID", new PersonIdDataDefinition(), nullString);
+
 		// a. serial number
 		PatientIdentifierType pit = MohCacheUtils.getPatientIdentifierType(
 				Context.getAdministrationService().getGlobalProperty("cccgenerator.CCC"));
-		dsd.addColumn("Serial Number", new PatientIdentifierDataDefinition("CCC", pit), null, new MOHSerialNumberConverter());
+		PatientIdentifierDataDefinition cccColumn = new PatientIdentifierDataDefinition("CCC", pit);
+
+		dsd.addColumn("Serial Number", cccColumn, nullString, new MOHSerialNumberConverter());
 
 		// b. date chronic HIV+ care started
-//		LogicDataDefinition columnB = new LogicDataDefinition();
-//		columnB.setLogicQuery("\"MOH Confirmed HIV Positive Date\"");
-//		dsd.addColumn("Date Chronic HIV Care Started", columnB, null);
+		EnrollmentDateDataDefinition enrollmentDate = new EnrollmentDateDataDefinition();
+		dsd.addColumn("Date Chronic HIV Care Started", enrollmentDate, nullString, commonDateConverter);
 
 		// c. Unique Patient Number
-		dsd.addColumn("Unique Patient Number", new PatientIdentifierDataDefinition("CCC", pit), null);
+		dsd.addColumn("Unique Patient Number", cccColumn, nullString);
 
 		// d. Patient's Name
-		dsd.addColumn("Name", new PreferredNameDataDefinition(), null, new MOHPersonNameConverter());
+		dsd.addColumn("Name", new PreferredNameDataDefinition(), nullString, new MOHPersonNameConverter());
 
 		// e1. Date of Birth
-		dsd.addColumn("Date of Birth", new BirthdateDataDefinition(), null, new BirthdateConverter(MohRuleUtils.DATE_FORMAT));
+		dsd.addColumn("Date of Birth", new BirthdateDataDefinition(), nullString, new BirthdateConverter(MohRuleUtils.DATE_FORMAT));
 
 		// e2. Age at Enrollment
-//		dsd.addColumn("Age at Enrollment", new AgeDataDefinition(), null, new AgeConverter());
+
+		MappedData<EnrollmentDateDataDefinition> mappedDef = new MappedData<EnrollmentDateDataDefinition>();
+		mappedDef.setParameterizable(enrollmentDate);
+		mappedDef.addConverter(new DateConverter());
+		AgeAtDateOfOtherDataDefinition ageAtEnrollment = new AgeAtDateOfOtherDataDefinition();
+		ageAtEnrollment.setEffectiveDateDefinition(mappedDef);
+
+		dsd.addColumn("Age at Enrollment", ageAtEnrollment, nullString, new DecimalAgeConverter(2));
 
 		// f. Sex
-		dsd.addColumn("Sex", new GenderDataDefinition(), null);
+		dsd.addColumn("Sex", new GenderDataDefinition(), nullString);
 
-//		// g. Entry point: From where?
-//		// TODO add a StringConverter here
-//		PersonAttributeType pat = Context.getPersonService().getPersonAttributeTypeByName(MohEvaluableNameConstants.POINT_OF_HIV_TESTING);
-//		dsd.addColumn("Entry Point", new PersonAttributeDataDefinition("entryPoint", pat), null);
-//
-//		// h. Confirmed HIV+ Date
-//		dsd.addColumn("Confirmed HIV+ Date", columnB, null);
-//
+		// g. Entry point: From where?
+		// TODO add a StringConverter here
+		PersonAttributeType pat = Context.getPersonService().getPersonAttributeTypeByName(MohEvaluableNameConstants.POINT_OF_HIV_TESTING);
+		dsd.addColumn("Entry Point", new PersonAttributeDataDefinition("entryPoint", pat), nullString);
+
+		// h. Confirmed HIV+ Date
+		dsd.addColumn("Confirmed HIV+ Date", enrollmentDate, nullString, commonDateConverter);
+
 //		// i. PEP Start / Stop Date
 //		LogicDataDefinition columnI = new LogicDataDefinition();
 //		columnI.setLogicQuery("\"MOH PEP Start Stop Date\"");
 //		dsd.addColumn("PEP Start / Stop Date", columnI, null);
-//
+
 //		// j. Reasons for PEP use:
 //		LogicDataDefinition columnJ = new LogicDataDefinition();
 //		columnJ.setLogicQuery("\"MOH Reasons For PEP\"");
 //		dsd.addColumn("Reasons for PEP Use", columnJ, null);
-//
+
 //		// k. CTX startdate and stopdate:
 ////		LogicDataDefinition columnK = new LogicDataDefinition();
 ////		columnK.setLogicQuery("\"MOH CTX Start-Stop Date\"");
 ////		dsd.addColumn("CTX Start / Stop Date", columnK, null);
-//
+
 //		// l. Fluconazole startdate and stopdate
 //		LogicDataDefinition columnL = new LogicDataDefinition();
 //		columnL.setLogicQuery("\"MOH Fluconazole Start-Stop Date\"");
 //		dsd.addColumn("Fluconazole Start / Stop Date", columnL, null);
-//
+
 //		// m. TB treatment startdate and stopdate
 ////		LogicDataDefinition columnM = new LogicDataDefinition();
 ////		columnM.setLogicQuery("\"MOH TB Start-Stop Date\"");
@@ -107,12 +123,14 @@ public class MOH361AReport {
 //		LogicDataDefinition columnO = new LogicDataDefinition();
 //		columnO.setLogicQuery("\"MOH LTFU-TO-DEAD\"");
 //		dsd.addColumn("LTFU / TO / DEAD", columnO, null);
-//
-//		// p. WHO clinical Stage and date
+
+		// p. WHO clinical Stage and date
+		WHOStageAndDateDataDefinition whoStageAndDateDataDefinition = new WHOStageAndDateDataDefinition();
+		dsd.addColumn("WHO Clinical Stage", whoStageAndDateDataDefinition, nullString, new WHOStageAndDateConverter());
 //		LogicDataDefinition columnP = new LogicDataDefinition();
 //		columnP.setLogicQuery("\"MOH WHO Stage\"");
 //		dsd.addColumn("WHO Clinical Stage", columnP, null);
-//
+
 //		// q. Date medically eligible for ART
 //		LogicDataDefinition columnQ = new LogicDataDefinition();
 //		columnQ.setLogicQuery("\"MOH Date and Reason Medically Eligible For ART\"");
