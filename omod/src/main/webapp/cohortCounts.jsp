@@ -56,8 +56,7 @@
 
     function getLocationCount(locationId, callback) {
         $j(".size[location=" + locationId + "]").html("Calculating ...");
-        var evaluationDate = new Date($j("#evaluationDate").val());
-        DWRAmrsReportService.getCohortCountForLocation(locationId, evaluationDate, function(size){
+        DWRAmrsReportService.getCohortCountForLocation(locationId, evaluationDate.getDate(), function(size){
             $j(".size[location=" + locationId + "]").html(size);
             callback();
         });
