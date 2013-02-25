@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.dataset.DataSet;
+import org.openmrs.module.reporting.dataset.SimpleDataSet;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.report.ReportData;
@@ -13,8 +14,7 @@ import org.openmrs.module.reporting.report.definition.service.ReportDefinitionSe
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,24 +22,22 @@ import java.util.Set;
 /**
  * Helper utility for running reports and not overloading the system
  */
-public class ReportUtil {
+public class MOHReportUtil {
 
-	private static final int MAX_RECORDS = 1000;
-	private static final Log log = LogFactory.getLog(ReportUtil.class);
+	private static final int MAX_RECORDS = 10;
+	private static final Log log = LogFactory.getLog(MOHReportUtil.class);
 
 	public static ReportData evaluate(ReportDefinition reportDefinition, EvaluationContext evaluationContext) throws EvaluationException {
 		ReportDefinitionService reportDefinitionService = Context.getService(ReportDefinitionService.class);
 
-		Map<String, DataSet> dataSets = new LinkedHashMap<String, DataSet>();
+		Map<String, List<DataSet>> dataSets = new HashMap<String, List<DataSet>>();
 		Cohort cohort = evaluationContext.getBaseCohort();
 		Set<Integer> memberIds = cohort.getMemberIds();
 		Integer[] members = memberIds.toArray(new Integer[]{});
 
 		while (members.length > 0) {
-			log.warn("length is still: " + members.length);
 
 			int size = Math.min(MAX_RECORDS, members.length);
-
 			Integer[] subset = Arrays.copyOfRange(members, 0, size);
 
 			if (size == members.length) {
@@ -51,13 +49,22 @@ public class ReportUtil {
 			Cohort subCohort = new Cohort(Arrays.asList(subset));
 			evaluationContext.setBaseCohort(subCohort);
 			ReportData tempReportData = reportDefinitionService.evaluate(reportDefinition, evaluationContext);
-			dataSets.putAll(tempReportData.getDataSets());
+
+			Map<String, DataSet> tmpDataSets = tempReportData.getDataSets();
+			for (String key: tmpDataSets.keySet()) {
+				if (!dataSets.containsKey(key))
+					dataSets.put(key, new ArrayList<DataSet>());
+				dataSets.get(key).add(tmpDataSets.get(key));
+			}
 		}
+
+		// at this point, dataSets has a map of lists of datasets
+		Map<String, DataSet> finalDataSets = new HashMap<String, DataSet>();
 
 		ReportData reportData = new ReportData();
 		reportData.setDefinition(reportDefinition);
 		reportData.setContext(evaluationContext);
-		reportData.setDataSets(dataSets);
+		// reportData.setDataSets(dataSets);
 		return reportData;
 	}
 }
