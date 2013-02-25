@@ -7,13 +7,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,9 +27,8 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.amrsreport.cohort.definition.Moh361ACohortDefinition;
 import org.openmrs.module.amrsreport.render.AmrReportRender;
-import org.openmrs.module.amrsreport.reports.MOH361AReport;
+import org.openmrs.module.amrsreport.reporting.MOH361AReport;
 import org.openmrs.module.amrsreport.service.MohCoreService;
-import org.openmrs.module.amrsreport.util.ReportUtil;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
@@ -107,29 +104,22 @@ public class MohRenderController {
 			evaluationContext.setBaseCohort(cohort);
 
 			Date d = Calendar.getInstance().getTime();
-			String TIME;
-
-			Format formatter = new SimpleDateFormat("yyyy:MM:dd hh:mm:ss a");
-
-			TIME = formatter.format(d);
+			String TIME = new SimpleDateFormat("yyyy:MM:dd hh:mm:ss a").format(d);
 
 			AdministrationService as = Context.getAdministrationService();
 			String folderName = as.getGlobalProperty("amrsreport.file_dir");
 
-			File loaddir = OpenmrsUtil.getDirectoryInApplicationDataDirectory(folderName);
-
-			log.warn("STARTING");
-			ReportData reportData = ReportUtil.evaluate(reportDefinition, evaluationContext);
-			log.warn("DONE");
+			ReportDefinitionService reportDefinitionService = Context.getService(ReportDefinitionService.class);
+			ReportData reportData = reportDefinitionService.evaluate(reportDefinition, evaluationContext);
 
 			//create a flat file here for storing our report data
 
 			AmrReportRender amrReportRender = new AmrReportRender();
 			String fileURL = loc.getName() + "-" + TIME + "-MOH-Register-361A.csv";
+			File loaddir = OpenmrsUtil.getDirectoryInApplicationDataDirectory(folderName);
 			File amrsreport = new File(loaddir, fileURL);
 			log.info("This is the file " + fileURL);
 			BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(amrsreport));
-
 			amrReportRender.render(reportData, "Report information ", outputStream);
 
 			//normal file operations to follow here
