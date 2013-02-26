@@ -7,9 +7,7 @@ import org.openmrs.module.amrsreport.cache.MohCacheUtils;
 import org.openmrs.module.amrsreport.reporting.converter.DecimalAgeConverter;
 import org.openmrs.module.amrsreport.reporting.converter.MOHPersonNameConverter;
 import org.openmrs.module.amrsreport.reporting.converter.MOHSerialNumberConverter;
-import org.openmrs.module.amrsreport.reporting.converter.WHOStageAndDateConverter;
 import org.openmrs.module.amrsreport.reporting.data.EnrollmentDateDataDefinition;
-import org.openmrs.module.amrsreport.reporting.data.WHOStageAndDateDataDefinition;
 import org.openmrs.module.amrsreport.rule.MohEvaluableNameConstants;
 import org.openmrs.module.amrsreport.rule.util.MohRuleUtils;
 import org.openmrs.module.reporting.data.MappedData;
@@ -89,62 +87,60 @@ public class MOH361AReport {
 		// h. Confirmed HIV+ Date
 		dsd.addColumn("Confirmed HIV+ Date", enrollmentDate, nullString, commonDateConverter);
 
-//		// i. PEP Start / Stop Date
-//		LogicDataDefinition columnI = new LogicDataDefinition();
-//		columnI.setLogicQuery("\"MOH PEP Start Stop Date\"");
-//		dsd.addColumn("PEP Start / Stop Date", columnI, null);
+		// i. PEP Start / Stop Date
+		LogicDataDefinition columnI = new LogicDataDefinition();
+		columnI.setLogicQuery("\"MOH PEP Start Stop Date\"");
+		dsd.addColumn("PEP Start / Stop Date", columnI, nullString);
 
-//		// j. Reasons for PEP use:
-//		LogicDataDefinition columnJ = new LogicDataDefinition();
-//		columnJ.setLogicQuery("\"MOH Reasons For PEP\"");
-//		dsd.addColumn("Reasons for PEP Use", columnJ, null);
+		// j. Reasons for PEP use:
+		LogicDataDefinition columnJ = new LogicDataDefinition();
+		columnJ.setLogicQuery("\"MOH Reasons For PEP\"");
+		dsd.addColumn("Reasons for PEP Use", columnJ, nullString);
 
-//		// k. CTX startdate and stopdate:
-////		LogicDataDefinition columnK = new LogicDataDefinition();
-////		columnK.setLogicQuery("\"MOH CTX Start-Stop Date\"");
-////		dsd.addColumn("CTX Start / Stop Date", columnK, null);
+		// k. CTX startdate and stopdate:
+		LogicDataDefinition columnK = new LogicDataDefinition();
+		columnK.setLogicQuery("\"MOH CTX Start-Stop Date\"");
+		dsd.addColumn("CTX Start / Stop Date", columnK, nullString);
 
-//		// l. Fluconazole startdate and stopdate
-//		LogicDataDefinition columnL = new LogicDataDefinition();
-//		columnL.setLogicQuery("\"MOH Fluconazole Start-Stop Date\"");
-//		dsd.addColumn("Fluconazole Start / Stop Date", columnL, null);
+		// l. Fluconazole startdate and stopdate
+		LogicDataDefinition columnL = new LogicDataDefinition();
+		columnL.setLogicQuery("\"MOH Fluconazole Start-Stop Date\"");
+		dsd.addColumn("Fluconazole Start / Stop Date", columnL, nullString);
 
-//		// m. TB treatment startdate and stopdate
-////		LogicDataDefinition columnM = new LogicDataDefinition();
-////		columnM.setLogicQuery("\"MOH TB Start-Stop Date\"");
-////		dsd.addColumn("TB Treatment Start / Stop Date", columnM, null);
-//
-//		// n. Pregnancy Yes?, Due date, PMTCT refer
-//		LogicDataDefinition columnN = new LogicDataDefinition();
-//		columnN.setLogicQuery("\"MOH Pregnancy PMTC Referral\"");
-//		dsd.addColumn("Pregnancy EDD and Referral", columnN, null);
-//
-//		// o. LTFU / TO / Dead and date when the event occurred
-//		LogicDataDefinition columnO = new LogicDataDefinition();
-//		columnO.setLogicQuery("\"MOH LTFU-TO-DEAD\"");
-//		dsd.addColumn("LTFU / TO / DEAD", columnO, null);
+		// m. TB treatment startdate and stopdate
+		LogicDataDefinition columnM = new LogicDataDefinition();
+		columnM.setLogicQuery("\"MOH TB Start-Stop Date\"");
+		dsd.addColumn("TB Treatment Start / Stop Date", columnM, nullString);
+
+		// n. Pregnancy Yes?, Due date, PMTCT refer
+		LogicDataDefinition columnN = new LogicDataDefinition();
+		columnN.setLogicQuery("\"MOH Pregnancy PMTC Referral\"");
+		dsd.addColumn("Pregnancy EDD and Referral", columnN, nullString);
+
+		// o. LTFU / TO / Dead and date when the event occurred
+		LogicDataDefinition columnO = new LogicDataDefinition();
+		columnO.setLogicQuery("\"MOH LTFU-TO-DEAD\"");
+		dsd.addColumn("LTFU / TO / DEAD", columnO, nullString);
 
 		// p. WHO clinical Stage and date
-		WHOStageAndDateDataDefinition whoStageAndDateDataDefinition = new WHOStageAndDateDataDefinition();
-		dsd.addColumn("WHO Clinical Stage", whoStageAndDateDataDefinition, nullString, new WHOStageAndDateConverter());
-//		LogicDataDefinition columnP = new LogicDataDefinition();
-//		columnP.setLogicQuery("\"MOH WHO Stage\"");
-//		dsd.addColumn("WHO Clinical Stage", columnP, null);
+		LogicDataDefinition columnP = new LogicDataDefinition();
+		columnP.setLogicQuery("\"MOH WHO Stage\"");
+		dsd.addColumn("WHO Clinical Stage", columnP, nullString);
 
-//		// q. Date medically eligible for ART
-//		LogicDataDefinition columnQ = new LogicDataDefinition();
-//		columnQ.setLogicQuery("\"MOH Date and Reason Medically Eligible For ART\"");
-//		dsd.addColumn("Date Medically Eligible for ART", columnQ, null);
-//
-//		// r. Reason Medically Eligible for ART
+		// q. Date medically eligible for ART
+		LogicDataDefinition columnQ = new LogicDataDefinition();
+		columnQ.setLogicQuery("\"MOH Date and Reason Medically Eligible For ART\"");
+		dsd.addColumn("Date Medically Eligible for ART", columnQ, nullString);
+
+		// r. Reason Medically Eligible for ART
 //		LogicDataDefinition columnR = new LogicDataDefinition();
 //		columnR.setLogicQuery("\"MOH Date and Reason Medically Eligible For ART\"");
-//		dsd.addColumn("Reason Medically Eligible for ART", columnR, null);
-//
-//		// s. Date ART started (Transfer to ART register)
-//		LogicDataDefinition columnS = new LogicDataDefinition();
-//		columnS.setLogicQuery("\"MOH Date ART Started\"");
-//		dsd.addColumn("Date ART Started", columnS, null);
+		dsd.addColumn("Reason Medically Eligible for ART", columnQ, nullString);
+
+		// s. Date ART started (Transfer to ART register)
+		LogicDataDefinition columnS = new LogicDataDefinition();
+		columnS.setLogicQuery("\"MOH Date ART Started\"");
+		dsd.addColumn("Date ART Started", columnS, nullString);
 
 		report.addDataSetDefinition(dsd, null);
 
