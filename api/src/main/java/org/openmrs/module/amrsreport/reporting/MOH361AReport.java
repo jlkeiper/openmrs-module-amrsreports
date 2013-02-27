@@ -130,12 +130,13 @@ public class MOH361AReport {
 		// q. Date medically eligible for ART
 		LogicDataDefinition columnQ = new LogicDataDefinition();
 		columnQ.setLogicQuery("\"MOH Date and Reason Medically Eligible For ART\"");
-		dsd.addColumn("Date Medically Eligible for ART", columnQ, nullString);
+		dsd.addColumn("Date and Reason Medically Eligible for ART", columnQ, nullString);
 
 		// r. Reason Medically Eligible for ART
+// TODO make this into a separate column by using a converter
 //		LogicDataDefinition columnR = new LogicDataDefinition();
 //		columnR.setLogicQuery("\"MOH Date and Reason Medically Eligible For ART\"");
-		dsd.addColumn("Reason Medically Eligible for ART", columnQ, nullString);
+//		dsd.addColumn("Reason Medically Eligible for ART", columnQ, nullString);
 
 		// s. Date ART started (Transfer to ART register)
 		LogicDataDefinition columnS = new LogicDataDefinition();
