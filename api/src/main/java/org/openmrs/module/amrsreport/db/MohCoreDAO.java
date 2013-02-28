@@ -84,6 +84,8 @@ public interface MohCoreDAO {
 	public HIVCareEnrollment saveEnrollment(HIVCareEnrollment HIVCareEnrollment);
 
 	public Map<Integer,Date> getEnrollmentDateMap(Set<Integer> cohort);
-
+	
 	public Map<Integer,WHOStageAndDate> getWHOStageAndDateMap(Set<Integer> cohort);
+	
+	public List<Date> getAllEnrollmentReportDates();
 }

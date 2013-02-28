@@ -7,31 +7,31 @@
 <openmrs:htmlInclude file="/dwr/interface/DWRAmrsReportService.js"/>
 
 <script type="text/javascript">
-    var evaluationDate;
 
     $j(document).ready(function () {
 
-        $j("#download").click(function(event){
-            event.preventDefault();
-
-            var evaluationDate = $j("#evaluationDate").val();
-
-            var locations = [];
-            $j("[name=location]:checked").each(function(){
-                $j(this).removeAttr("checked");
-                var locationId = $j(this).val();
-                locations.push(locationId);
-            });
-
-            var query = $j.param({ 'locations': locations, 'evaluationDate': evaluationDate });
-            window.location.href = "<openmrs:contextPath/>/module/amrsreport/downloadCohortCounts.htm?" + query;
-        });
+//        $j("#download").click(function(event){
+//            event.preventDefault();
+//
+//            var evaluationDate = $j("#evaluationDate").val();
+//
+//            var locations = [];
+//            $j("[name=location]:checked").each(function(){
+//                $j(this).removeAttr("checked");
+//                var locationId = $j(this).val();
+//                locations.push(locationId);
+//            });
+//
+//            var query = $j.param({ 'locations': locations, 'evaluationDate': evaluationDate });
+//            window.location.href = "<openmrs:contextPath/>/module/amrsreport/downloadCohortCounts.htm?" + query;
+//        });
 
         $j("#update").click(function(event){
             event.preventDefault();
+            var reportDate = getReportDate();
             $j("[name=location]:checked").each(function(){
                 var locationId = $j(this).val();
-                getLocationCount(locationId, function(){
+                getLocationCount(locationId, reportDate, function(){
                     $j("[name=location][location=" + locationId + "]").removeAttr("checked");
                 });
             });
@@ -51,12 +51,16 @@
             });
         });
 
-        evaluationDate = new DatePicker("<openmrs:datePattern/>", "evaluationDate", { defaultDate: new Date() });
     });
 
-    function getLocationCount(locationId, callback) {
+    function getReportDate() {
+        var selection = $j("input[name=reportDate]:checked").val();
+        return new Date(parseInt(selection));
+    }
+
+    function getLocationCount(locationId, reportDate, callback) {
         $j(".size[location=" + locationId + "]").html("Calculating ...");
-        DWRAmrsReportService.getCohortCountForLocation(locationId, evaluationDate.getDate(), function(size){
+        DWRAmrsReportService.getCohortCountForLocation(locationId, reportDate, function(size){
             $j(".size[location=" + locationId + "]").html(size);
             callback();
         });
@@ -70,9 +74,12 @@
 <div class="box" style=" width:99%; height:auto;  overflow-x: auto;">
     <form>
         <div id="actions">
-            <label for="evaluationDate">Evaluation Date:</label>
-            <input id="evaluationDate" name="evaluationDate" type="text"/>
-            <button id="update">Update Size for Selected Location(s)</button>
+            <label>Evaluation Date:</label> <br/>
+            <c:forEach items="${reportDates}" var="reportDate">
+                 <input type="radio" name="reportDate" value='<openmrs:formatDate date="${reportDate}" type="milliseconds"/>'>
+                 <openmrs:formatDate date="${reportDate}" type="textbox"/> <br/>
+            </c:forEach>
+            <button id="update">Update Size for Selected Date and Location(s)</button>
             <!--
             <button id="download">Download Cohort List for Selected Location(s)</button>
             -->

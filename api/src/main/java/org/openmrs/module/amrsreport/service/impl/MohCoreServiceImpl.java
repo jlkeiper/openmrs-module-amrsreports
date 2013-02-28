@@ -201,10 +201,15 @@ public class MohCoreServiceImpl extends BaseOpenmrsService implements MohCoreSer
 	public Map<Integer, Date> getEnrollmentDateMap(Set<Integer> cohort) {
 		return mohCoreDAO.getEnrollmentDateMap(cohort);
 	}
-
+	
 	@Override
 	public Map<Integer, WHOStageAndDate> getWHOStageAndDateMap(Set<Integer> cohort) {
 		return mohCoreDAO.getWHOStageAndDateMap(cohort);
+	}
+	
+	@Override
+	public List<Date> getAllEnrollmentReportDates() {
+		return mohCoreDAO.getAllEnrollmentReportDates();
 	}
 
 }
