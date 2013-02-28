@@ -40,6 +40,7 @@ import org.openmrs.util.OpenmrsUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,25 +53,29 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class MohRenderController {
 
 	private static final Log log = LogFactory.getLog(MohRenderController.class);
-	List<String> cohortdfnList = null;
+
+	@ModelAttribute("reportDates")
+	public List<Date> getReportDates() {
+		return Context.getService(MohCoreService.class).getAllEnrollmentReportDates();
+	}
+
+	@ModelAttribute("locations")
+	public List<Location> getLocations() {
+		MohCoreService mohCoreService = Context.getService(MohCoreService.class);
+		User currUser = Context.getAuthenticatedUser();
+		return mohCoreService.getAllowedLocationsForUser(currUser);
+	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "module/amrsreport/mohRender.form")
-	public void preparePage(ModelMap map, @RequestParam(required = false, value = "includeRetired") Boolean includeRetired) {
-
-		MohCoreService mohCoreService = Context.getService(MohCoreService.class);
-
-		//get a list of all the locations
-		User currUser = Context.getAuthenticatedUser();
-		List<Location> locationList = mohCoreService.getAllowedLocationsForUser(currUser);
-
-		map.addAttribute("location", locationList);
+	public void preparePage() {
+		// pass
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "module/amrsreport/mohRender.form")
 	public void processForm(ModelMap map, HttpServletRequest request,
 	                        @RequestParam(required = false, value = "definition") String definitionuuid,
 	                        @RequestParam(required = false, value = "cohortdef") String cohortdefuuid,
-	                        @RequestParam("evaluationDate") Date evaluationDate,
+	                        @RequestParam("reportDate") Date reportDate,
 	                        @RequestParam("location") Integer location,
 	                        @RequestParam("hardcoded") String hardcoded) {
 
@@ -95,8 +100,7 @@ public class MohRenderController {
 
 			// set up evaluation context values
 			evaluationContext.addParameterValue("locationList", Arrays.asList(loc));
-			evaluationContext.addParameterValue("endDate", evaluationDate);
-			evaluationContext.setEvaluationDate(evaluationDate);
+			evaluationContext.setEvaluationDate(reportDate);
 
 			// get the cohort
 			CohortDefinitionService cohortDefinitionService = Context.getService(CohortDefinitionService.class);
@@ -179,10 +183,10 @@ public class MohRenderController {
 
 		// populate model for reloading of screen
 
-		MohCoreService mohCoreService = Context.getService(MohCoreService.class);
-		User currUser = Context.getAuthenticatedUser();
-		List<Location> locationList = mohCoreService.getAllowedLocationsForUser(currUser);
-		map.addAttribute("location", locationList);
+//		MohCoreService mohCoreService = Context.getService(MohCoreService.class);
+//		User currUser = Context.getAuthenticatedUser();
+//		List<Location> locationList = mohCoreService.getAllowedLocationsForUser(currUser);
+//		map.addAttribute("locations", locationList);
 	}
 
 

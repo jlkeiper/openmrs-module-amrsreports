@@ -26,9 +26,14 @@
 		background-color: #d3d3d3;
 		color: #000000;
 	}
+    .visualPadding { margin: 1em; }
+/*
+    .oneThird { float: left; width: 30%; min-height: 10em; }
+*/
+    .newline { clear: both; display: block; }
 </style>
+
 <script type="text/javascript">
-    var evaluationDate;
 
 	$j(document).ready(function(){
 
@@ -80,9 +85,11 @@
 			return false;
 		});
 
-        evaluationDate = new DatePicker("<openmrs:datePattern/>", "evaluationDate", { defaultDate: new Date() });
-        evaluationDate.setDate(new Date());
-        evaluationDate.refresh();
+        // trim all date values to 10 characters .. ugh.
+        $j("input[name=reportDate]").each(function(){
+            $j(this).val($j(this).val().substring(0, 10));
+        });
+
     });
 
 	function clearDataTable(){
@@ -141,37 +148,26 @@
 
 <b class="boxHeader">Run AMRS Reports</b>
 <div class="box" style=" width:99%; height:auto;  overflow-x: auto;">
-	<form method="POST" name="amrsreportrenderer" action="mohRender.form">
-		<table>
-            <tr>
-                <td><b>Evaluation Date:</b></td>
-                <td><input id="evaluationDate" name="evaluationDate" type="text"/></td>
-            </tr>
-            <tr>
-				<td><b>Location:</b></td>
-				<td><select name="location" onchange="clearDataTable()">
-						<c:forEach var="location" items="${location}" >
-							<option  value="${location.locationId}" >${location.name}</option>
-						</c:forEach>
-					</select>
-				</td>
-			</tr>
-            <tr>
-                <td><b>Built-in Reports:</b></td>
-                <td><select name="hardcoded" onchange="clearDataTable()">
-                    <!-- <option value="" selected> </option> -->
-                    <option value="ack">MOH 361A</option>
-                </select>
-                </td>
-            </tr>
-            <tr>
-				<td>&nbsp;</td>
-				<td>
-					<input type="submit" value="View" />
-				</td>
-			</tr>
-		</table>
-	</form>
+    <form method="POST" name="amrsreportrenderer" action="mohRender.form">
+        <fieldset class="visualPadding oneThird">
+            <legend>Report Date (as of)</legend>
+            <c:forEach items="${reportDates}" var="reportDate">
+                <input type="radio" name="reportDate" value='<openmrs:formatDate date="${reportDate}" type="textbox"/>'>
+                <openmrs:formatDate date="${reportDate}" type="textbox"/> <br/>
+            </c:forEach>
+        </fieldset>
+        <fieldset class="visualPadding oneThird">
+            <legend>Location</legend>
+            <c:forEach var="location" items="${locations}">
+                <input type="radio" name="location" value="${location.locationId}"/> ${location.name} <br/>
+            </c:forEach>
+        </fieldset>
+        <fieldset class="visualPadding oneThird">
+            <legend>Reports</legend>
+            <input type="radio" name="hardcoded" value="ack"/> MOH 361A <br/>
+        </fieldset>
+        <input id="submitButton" class="visualPadding newline" type="submit" value="View"/>
+    </form>
 </div>
 
 <c:if test="${not empty records}">
