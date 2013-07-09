@@ -1,11 +1,7 @@
 <%@ include file="/WEB-INF/template/include.jsp"%>
-
 <%@ include file="/WEB-INF/template/header.jsp"%>
 
-<openmrs:require privilege="View Reports" otherwise="/login.htm" redirect="/module/amrsreports/mohHistory.form" />
-
-<openmrs:htmlInclude file="/moduleResources/amrsreports/css/amrsreports.css" />
-<openmrs:htmlInclude file="/dwr/interface/DWRAmrsReportService.js"/>
+<openmrs:require privilege="View Reports" otherwise="/login.htm" redirect="/module/amrsreports/queuedReport.list" />
 
 <style>
     .subheading { height: 3em; }
@@ -13,8 +9,12 @@
     #reportTable th, #reportTable td { text-align: center; }
 </style>
 
-
 <%@ include file="localHeader.jsp"%>
+
+<a href="queuedReport.form">Add a Scheduled Report</a>
+
+<br />
+<br />
 
 <b class="boxHeader">View AMRS Reports</b>
 <div class="box">
@@ -41,7 +41,7 @@
                     <td>${r.reportName}</td>
                     <td>${r.facility}</td>
                     <td><openmrs:formatDate date="${r.evaluationDate}" type="textbox"/></td>
-                    <td><openmrs:formatDate date="${r.dateScheduled}" type="textbox"/></td>
+                    <td><openmrs:formatDate date="${r.dateScheduled}" format="${datetimeFormat}"/></td>
                 </tr>
             </c:forEach>
             <tr><td colspan="5">&nbsp;</td></tr>
@@ -65,7 +65,7 @@
                     <td>${r.reportName}</td>
                     <td>${r.facility}</td>
                     <td><openmrs:formatDate date="${r.evaluationDate}" type="textbox"/></td>
-                    <td><openmrs:formatDate date="${r.dateScheduled}" type="textbox"/></td>
+                    <td><openmrs:formatDate date="${r.dateScheduled}" format="${datetimeFormat}"/></td>
                 </tr>
             </c:forEach>
             <tr><td colspan="5">&nbsp;</td></tr>
@@ -91,7 +91,7 @@
                     <td>${r.reportName}</td>
                     <td>${r.facility}</td>
                     <td><openmrs:formatDate date="${r.evaluationDate}" type="textbox"/></td>
-                    <td><openmrs:formatDate date="${r.dateScheduled}" type="textbox"/></td>
+                    <td><openmrs:formatDate date="${r.dateScheduled}" format="${datetimeFormat}"/></td>
                 </tr>
             </c:forEach>
             <tr><td colspan="5">&nbsp;</td></tr>
@@ -115,7 +115,7 @@
                     <td>${r.reportName}</td>
                     <td>${r.facility}</td>
                     <td><openmrs:formatDate date="${r.evaluationDate}" type="textbox"/></td>
-                    <td><openmrs:formatDate date="${r.dateScheduled}" type="textbox"/></td>
+                    <td><openmrs:formatDate date="${r.dateScheduled}" format="${datetimeFormat}"/></td>
                 </tr>
             </c:forEach>
         </c:if>

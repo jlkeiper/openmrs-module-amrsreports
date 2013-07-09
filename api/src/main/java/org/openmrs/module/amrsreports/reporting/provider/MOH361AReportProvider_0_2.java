@@ -29,23 +29,19 @@ import org.openmrs.module.amrsreports.reporting.data.LastRTCDateDataDefinition;
 import org.openmrs.module.amrsreports.reporting.data.PmtctPregnancyDataDefinition;
 import org.openmrs.module.amrsreports.reporting.data.SerialNumberDataDefinition;
 import org.openmrs.module.amrsreports.reporting.data.TbStartStopDataDefinition;
-import org.openmrs.module.amrsreports.reporting.data.TransferStatusDataDefinition;
 import org.openmrs.module.amrsreports.rule.MohEvaluableNameConstants;
 import org.openmrs.module.amrsreports.service.MohCoreService;
 import org.openmrs.module.amrsreports.util.MOHReportUtil;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.common.SortCriteria;
-import org.openmrs.module.reporting.common.TimeQualifier;
 import org.openmrs.module.reporting.data.MappedData;
 import org.openmrs.module.reporting.data.converter.BirthdateConverter;
-import org.openmrs.module.reporting.data.converter.BooleanConverter;
 import org.openmrs.module.reporting.data.converter.DateConverter;
 import org.openmrs.module.reporting.data.converter.ObjectFormatter;
 import org.openmrs.module.reporting.data.patient.definition.PatientIdentifierDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.AgeAtDateOfOtherDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.BirthdateDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.GenderDataDefinition;
-import org.openmrs.module.reporting.data.person.definition.ObsForPersonDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.PersonAttributeDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.PersonIdDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.PreferredNameDataDefinition;
@@ -68,11 +64,11 @@ import java.util.Properties;
 /**
  * Provides mechanisms for rendering the MOH 361A Pre-ART Register
  */
-public class MOH361AReportProvider implements ReportProvider {
+public class MOH361AReportProvider_0_2 extends ReportProvider {
 
-	@Override
-	public String getName() {
-		return "MOH 361A";
+	public MOH361AReportProvider_0_2() {
+		this.name = "MOH 361A 0.2-SNAPSHOT";
+		this.visible = true;
 	}
 
 	@Override
@@ -222,13 +218,13 @@ public class MOH361AReportProvider implements ReportProvider {
 		design.setRendererType(ExcelTemplateRenderer.class);
 
 		Properties props = new Properties();
-		props.put("repeatingSections", "sheet:1,row:4,dataset:allPatients");
+		props.put("repeatingSections", "sheet:2,row:4,dataset:allPatients");
 
 		design.setProperties(props);
 
 		ReportDesignResource resource = new ReportDesignResource();
 		resource.setName("template.xls");
-		InputStream is = OpenmrsClassLoader.getInstance().getResourceAsStream("templates/MOH361AReportTemplate.xls");
+		InputStream is = OpenmrsClassLoader.getInstance().getResourceAsStream("templates/MOH361AReportTemplate_0_2.xls");
 
 		if (is == null)
 			throw new APIException("Could not find report template.");

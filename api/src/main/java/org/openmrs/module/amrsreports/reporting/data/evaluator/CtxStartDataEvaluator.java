@@ -16,7 +16,7 @@ package org.openmrs.module.amrsreports.reporting.data.evaluator;
 import org.openmrs.Obs;
 import org.openmrs.annotation.Handler;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.amrsreports.reporting.data.CtxStartStopDataDefinition;
+import org.openmrs.module.amrsreports.reporting.data.CtxStartDataDefinition;
 import org.openmrs.module.reporting.common.ListMap;
 import org.openmrs.module.reporting.data.person.EvaluatedPersonData;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
@@ -32,9 +32,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * evaluator for CtxStartDataDefinition
  */
-@Handler(supports = CtxStartStopDataDefinition.class, order = 50)
-public class CtxStartStopDataEvaluator extends DrugStartStopDataEvaluator {
+@Handler(supports = CtxStartDataDefinition.class, order = 50)
+public class CtxStartDataEvaluator extends DrugStartStopDataEvaluator {
 
 	@Override
 	public EvaluatedPersonData evaluate(final PersonDataDefinition definition, final EvaluationContext context) throws EvaluationException {
@@ -46,10 +47,8 @@ public class CtxStartStopDataEvaluator extends DrugStartStopDataEvaluator {
 		String hql = "from Obs" +
 				" where voided = false" +
 				"   and person.personId in (:patientIds)" +
-				"   and (" +
-				"     (concept.id = 1263 and valueCoded is not null) " +
-				"     or (concept.id in (1193, 1109, 1263) and valueCoded.id = 916) " +
-				"   )" +
+				"   and concept.id = 1263" +
+				"   and valueCoded.id = 916" +
 				"   and obsDatetime between '2001-01-01' and :reportDate" +
 				"   order by obsDatetime asc";
 
@@ -57,25 +56,12 @@ public class CtxStartStopDataEvaluator extends DrugStartStopDataEvaluator {
 		m.put("patientIds", context.getBaseCohort());
 		m.put("reportDate", context.getEvaluationDate());
 
-		ListMap<Integer, Date> mappedStartDates = makeDatesMapFromSQL(hql, m);
-
-		hql = "from Obs" +
-				" where voided = false" +
-				"   and person.personId in (:patientIds)" +
-				"   and (" +
-				"     (concept.id in (1262, 1925) and valueCoded is not null) " +
-				"     or (concept.id = 1261 and valueCoded.id = 1260) " +
-				"   )" +
-				"   and obsDatetime between '2001-01-01' and :reportDate" +
-				"   order by obsDatetime asc";
-
-		ListMap<Integer, Date> mappedStopDates = makeDatesMapFromSQL(hql, m);
+		ListMap<Integer, Date> mappedStartDates = makeDatesMapFromHQL(hql, m);
 
 		for (Integer memberId : context.getBaseCohort().getMemberIds()) {
-			Set<Date> stopDates = safeFind(mappedStopDates, memberId);
+
 			Set<Date> startDates = safeFind(mappedStartDates, memberId);
-			String rangeInformation = buildRangeInformation(startDates, stopDates);
-			data.addData(memberId, rangeInformation);
+			data.addData(memberId, startDates);
 		}
 
 		return data;
@@ -91,7 +77,7 @@ public class CtxStartStopDataEvaluator extends DrugStartStopDataEvaluator {
 	/**
 	 * replaces reportDate and personIds with data from private variables before generating a date map
 	 */
-	private ListMap<Integer, Date> makeDatesMapFromSQL(final String query, final Map<String, Object> substitutions) {
+	private ListMap<Integer, Date> makeDatesMapFromHQL(final String query, final Map<String, Object> substitutions) {
 		DataSetQueryService qs = Context.getService(DataSetQueryService.class);
 		List<Object> queryResult = qs.executeHqlQuery(query, substitutions);
 

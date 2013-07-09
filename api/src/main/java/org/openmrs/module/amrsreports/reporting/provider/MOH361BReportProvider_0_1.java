@@ -6,9 +6,11 @@ import org.openmrs.PersonAttributeType;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.amrsreports.reporting.cohort.definition.Moh361BCohortDefinition;
+import org.openmrs.module.amrsreports.reporting.converter.DateListCustomConverter;
 import org.openmrs.module.amrsreports.reporting.converter.DecimalAgeConverter;
 import org.openmrs.module.amrsreports.reporting.converter.MultiplePatientIdentifierConverter;
 import org.openmrs.module.amrsreports.reporting.data.AgeAtEvaluationDateDataDefinition;
+import org.openmrs.module.amrsreports.reporting.data.CtxStartDataDefinition;
 import org.openmrs.module.amrsreports.reporting.data.DateARTStartedDataDefinition;
 import org.openmrs.module.amrsreports.service.MohCoreService;
 import org.openmrs.module.amrsreports.util.MOHReportUtil;
@@ -37,13 +39,14 @@ import java.util.Properties;
 /**
  * Provides mechanisms for rendering the MOH 361A Pre-ART Register
  */
-public class MOH361BReportProvider implements ReportProvider {
+public class MOH361BReportProvider_0_1 extends ReportProvider {
 
 	public static final String CONTACT_PHONE_ATTRIBUTE_TYPE = "Contact Phone Number";
+	private static final String MONTH_AND_YEAR_FORMAT = "MM/yyyy";
 
-	@Override
-	public String getName() {
-		return "MOH 361B";
+	public MOH361BReportProvider_0_1() {
+		this.name = "MOH 361B 0.1-SNAPSHOT";
+		this.visible = true;
 	}
 
 	@Override
@@ -101,6 +104,9 @@ public class MOH361BReportProvider implements ReportProvider {
 		PersonAttributeDataDefinition patientPhoneContact = new PersonAttributeDataDefinition(pat);
 		dsd.addColumn("Phone Number", patientPhoneContact, nullString);
 
+        // CTX start date
+        dsd.addColumn("CTX Start Dates", new CtxStartDataDefinition(), nullString, new DateListCustomConverter(MONTH_AND_YEAR_FORMAT));
+
 		report.addDataSetDefinition(dsd, null);
 
 		return report;
@@ -125,7 +131,7 @@ public class MOH361BReportProvider implements ReportProvider {
 
 		ReportDesignResource resource = new ReportDesignResource();
 		resource.setName("template.xls");
-		InputStream is = OpenmrsClassLoader.getInstance().getResourceAsStream("templates/MOH361BReportTemplate.xls");
+		InputStream is = OpenmrsClassLoader.getInstance().getResourceAsStream("templates/MOH361BReportTemplate_0_1.xls");
 
 		if (is == null)
 			throw new APIException("Could not find report template.");

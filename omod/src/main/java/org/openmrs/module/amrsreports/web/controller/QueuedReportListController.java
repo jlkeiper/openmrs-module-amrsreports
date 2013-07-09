@@ -5,10 +5,8 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.amrsreports.QueuedReport;
 import org.openmrs.module.amrsreports.service.QueuedReportService;
-import org.openmrs.module.amrsreports.util.MOHReportUtil;
 import org.openmrs.util.OpenmrsUtil;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,16 +17,16 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Map;
 
 /**
  * controller for View AMRS Reports page
  */
 @Controller
-public class MohHistoryController {
+public class QueuedReportListController {
 
-	private static final Log log = LogFactory.getLog(MohHistoryController.class);
+	private static final Log log = LogFactory.getLog(QueuedReportListController.class);
 
 	@ModelAttribute("queuedReports")
 	public List<QueuedReport> getQueuedReports() {
@@ -50,9 +48,17 @@ public class MohHistoryController {
 		return Context.getService(QueuedReportService.class).getQueuedReportsWithStatus(QueuedReport.STATUS_COMPLETE);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "module/amrsreports/mohHistory.form")
-	public void preparePage() {
-		// pass
+	@ModelAttribute("datetimeFormat")
+	public String getDatetimeFormat() {
+		SimpleDateFormat sdf = Context.getDateFormat();
+		String format = sdf.toPattern();
+		format += " hh:mm a";
+		return format;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "module/amrsreports/queuedReport.list")
+	public String preparePage() {
+		return "module/amrsreports/queuedReportList";
 	}
 
 	@RequestMapping(value = "/module/amrsreports/downloadxls")

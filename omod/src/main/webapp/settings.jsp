@@ -1,10 +1,10 @@
 <%@ include file="/WEB-INF/template/include.jsp" %>
 <%@ include file="/WEB-INF/template/header.jsp" %>
 
-<openmrs:require privilege="View Global Properties" otherwise="/login.htm" redirect="/module/amrsreports/cohortCounts.list"/>
+<openmrs:require privilege="View Global Properties" otherwise="/login.htm" redirect="/module/amrsreports/settings.form"/>
 
-<openmrs:htmlInclude file="/dwr/util.js"/>
-<openmrs:htmlInclude file="/dwr/interface/DWRAmrsReportService.js"/>
+<%@ include file="localHeader.jsp" %>
+
 <openmrs:htmlInclude file="/dwr/interface/DWRAdministrationService.js" />
 
 <style>
@@ -97,8 +97,6 @@
     });
 
 </script>
-
-<%@ include file="localHeader.jsp" %>
 
 <h2>AMRS Reports Settings</h2>
 

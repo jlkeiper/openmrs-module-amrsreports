@@ -1,10 +1,7 @@
 <%@ include file="/WEB-INF/template/include.jsp" %>
 <%@ include file="/WEB-INF/template/header.jsp" %>
 
-<openmrs:require privilege="View Locations" otherwise="/login.htm" redirect="/module/amrsreports/facility.list"/>
-
-<openmrs:htmlInclude file="/dwr/util.js"/>
-<openmrs:htmlInclude file="/dwr/interface/DWRAmrsReportService.js"/>
+<openmrs:require privilege="View Locations" otherwise="/login.htm" redirect="/module/amrsreports/facility.form"/>
 
 <%@ include file="localHeader.jsp" %>
 
