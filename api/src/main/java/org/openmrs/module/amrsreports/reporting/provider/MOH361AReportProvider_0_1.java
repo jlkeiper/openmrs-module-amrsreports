@@ -61,14 +61,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 /**
  * Provides mechanisms for rendering the MOH 361A Pre-ART Register
  */
 public class MOH361AReportProvider_0_1 extends ReportProvider {
 
+	public static final String NAME = "MOH 361A 0.1";
+
 	public MOH361AReportProvider_0_1() {
-		this.name = "MOH 361A 0.1";
+		this.name = NAME;
 		this.visible = true;
 	}
 
@@ -80,7 +83,8 @@ public class MOH361AReportProvider_0_1 extends ReportProvider {
 		MohCoreService service = Context.getService(MohCoreService.class);
 
 		ReportDefinition report = new PeriodIndicatorReportDefinition();
-		report.setName("MOH 361A Report");
+		report.setName("MOH 361A 0.1");
+		report.setUuid(UUID.randomUUID().toString());
 
 		// set up the DSD
 		PatientDataSetDefinition dsd = new PatientDataSetDefinition();
@@ -89,6 +93,7 @@ public class MOH361AReportProvider_0_1 extends ReportProvider {
 		// set up parameters
 		Parameter facility = new Parameter();
 		facility.setName("facility");
+		facility.setLabel("Facility");
 		facility.setType(MOHFacility.class);
 
 		// add to report and data set definition
