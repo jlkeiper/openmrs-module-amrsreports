@@ -166,4 +166,12 @@ public class HibernateMOHFacilityDAO implements MOHFacilityDAO {
 		return new Cohort((List<Integer>) q.list());
 	}
 
+	@Override
+	public MOHFacility getFacilityByUuid(String uuid) {
+		Criteria c = sessionFactory.getCurrentSession().createCriteria(MOHFacility.class)
+				.add(Restrictions.eq("uuid", uuid));
+
+		return (MOHFacility) c.uniqueResult();
+	}
+
 }
