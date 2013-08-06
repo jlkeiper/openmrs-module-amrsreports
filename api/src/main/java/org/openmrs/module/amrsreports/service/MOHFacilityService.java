@@ -35,10 +35,10 @@ public interface MOHFacilityService {
 	public Set<Location> getAllocatedLocations();
 
 	@Transactional
-	void retireFacility(MOHFacility facility, String retireReason);
+	public void retireFacility(MOHFacility facility, String retireReason);
 
 	@Transactional
-	void purgeFacility(MOHFacility facility);
+	public void purgeFacility(MOHFacility facility);
 
 	@Transactional
 	public Map<Integer,PatientIdentifier> getCCCNumberMapForFacility(MOHFacility facility);
@@ -50,11 +50,14 @@ public interface MOHFacilityService {
 	public Integer countPatientsInFacilityMissingCCCNumbers(MOHFacility facility);
 
 	@Transactional
-	Integer assignMissingIdentifiersForFacility(MOHFacility facility);
+	public Integer assignMissingIdentifiersForFacility(MOHFacility facility);
 
 	@Transactional
-	Cohort getPatientsInFacilityMissingCCCNumbers(MOHFacility facility);
+	public Cohort getPatientsInFacilityMissingCCCNumbers(MOHFacility facility);
 
 	@Transactional
-	Integer getLatestSerialNumberForFacility(MOHFacility facility);
+	public Integer getLatestSerialNumberForFacility(MOHFacility facility);
+
+	@Transactional
+	public MOHFacility getFacilityByUuid(String uuid);
 }

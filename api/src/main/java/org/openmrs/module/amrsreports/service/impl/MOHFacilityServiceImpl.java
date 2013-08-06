@@ -154,6 +154,11 @@ public class MOHFacilityServiceImpl implements MOHFacilityService {
 		return dao.getLatestSerialNumberForFacility(facility);
 	}
 
+	@Override
+	public MOHFacility getFacilityByUuid(String uuid) {
+		return dao.getFacilityByUuid(uuid);
+	}
+
 
 	@Override
 	public Integer assignMissingIdentifiersForFacility(MOHFacility facility) {
