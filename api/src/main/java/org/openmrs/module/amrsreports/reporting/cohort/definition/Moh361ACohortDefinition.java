@@ -19,6 +19,8 @@ public class Moh361ACohortDefinition extends BaseCohortDefinition {
 
 	public Moh361ACohortDefinition() {
 		super();
+		this.setName("MOH 361A Cohort");
+		this.setDescription("Cohort for use with the MOH 361A Register");
 	}
 
 	public Moh361ACohortDefinition(MOHFacility facility) {
