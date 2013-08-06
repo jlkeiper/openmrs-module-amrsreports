@@ -12,15 +12,31 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.amrsreports.HIVCareEnrollment;
 import org.openmrs.module.amrsreports.MOHFacility;
 import org.openmrs.module.amrsreports.reporting.cohort.definition.Moh361ACohortDefinition;
+import org.openmrs.module.amrsreports.reporting.provider.ReportProvider;
+import org.openmrs.module.amrsreports.reporting.report.renderer.MOH361AExcelRenderer;
 import org.openmrs.module.amrsreports.service.HIVCareEnrollmentService;
 import org.openmrs.module.amrsreports.service.MOHFacilityService;
+import org.openmrs.module.amrsreports.service.ReportProviderRegistrar;
 import org.openmrs.module.amrsreports.task.AMRSReportsTask;
 import org.openmrs.module.amrsreports.task.RunQueuedReportsTask;
 import org.openmrs.module.amrsreports.task.UpdateHIVCareEnrollmentTask;
 import org.openmrs.module.amrsreports.util.TaskRunnerThread;
+import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
+import org.openmrs.module.reporting.evaluation.parameter.Mapped;
+import org.openmrs.module.reporting.evaluation.parameter.Parameter;
+import org.openmrs.module.reporting.evaluation.parameter.ParameterizableUtil;
+import org.openmrs.module.reporting.report.ReportDesign;
+import org.openmrs.module.reporting.report.ReportRequest;
+import org.openmrs.module.reporting.report.definition.ReportDefinition;
+import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
+import org.openmrs.module.reporting.report.renderer.ExcelTemplateRenderer;
+import org.openmrs.module.reporting.report.renderer.RenderingMode;
+import org.openmrs.module.reporting.report.renderer.ReportRenderer;
+import org.openmrs.module.reporting.report.renderer.XlsReportRenderer;
+import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.scheduler.TaskDefinition;
 import org.openmrs.util.OpenmrsUtil;
 import org.openmrs.util.PrivilegeConstants;
@@ -38,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -219,10 +236,10 @@ public class DWRAmrsReportService {
 		if (mohFacility == null)
 			return new HashSet<Integer>();
 
-		List<Location> facilityLocations = new ArrayList<Location>(mohFacility.getLocations());
-		context.addParameterValue("locationList", facilityLocations);
+		context.addParameterValue("facility", mohFacility);
 
 		Moh361ACohortDefinition definition = new Moh361ACohortDefinition();
+		definition.addParameter(new Parameter("facility", "Facility", MOHFacility.class));
 
 		try {
 			Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(definition, context);
@@ -245,8 +262,6 @@ public class DWRAmrsReportService {
 
 		AMRSReportsTask task = null;
 
-//		if (OpenmrsUtil.nullSafeEquals("arvs", taskName))
-//			task = new UpdateARVEncountersTask();
 		if (OpenmrsUtil.nullSafeEquals("enrollment", taskName))
 			task = new UpdateHIVCareEnrollmentTask();
 
@@ -399,5 +414,66 @@ public class DWRAmrsReportService {
 
 		Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_SCHEDULER);
 		return false;
+	}
+
+	public void queueAReport() {
+		String cohortDefinitionUUID = "MOH361ACohort0000000000000000000000000";
+		String reportDefinitionUUID = "MOH361A0100000000000000000000000000000";
+
+		ReportProvider p = ReportProviderRegistrar.getInstance().getReportProviderByName("MOH 361A 0.1");
+
+		ReportDefinition rd = Context.getService(ReportDefinitionService.class)
+				.getDefinitionByUuid(reportDefinitionUUID);
+
+		if (rd == null) {
+			rd = p.getReportDefinition();
+			rd.setUuid(reportDefinitionUUID);
+			Context.getService(ReportDefinitionService.class).saveDefinition(rd);
+		}
+
+		CohortDefinition cd = Context.getService(CohortDefinitionService.class)
+				.getDefinitionByUuid(cohortDefinitionUUID);
+
+		if (cd == null) {
+			cd = p.getCohortDefinition();
+			cd.setUuid(cohortDefinitionUUID);
+			Context.getService(CohortDefinitionService.class).saveDefinition(cd);
+		}
+
+		// Chepsaita
+		MOHFacility f = Context.getService(MOHFacilityService.class).getFacility(27);
+
+		ReportRequest r = new ReportRequest();
+
+		cd.addParameter(new Parameter("facility", "Facility", MOHFacility.class));
+		rd.addParameter(new Parameter("facility", "Facility", MOHFacility.class));
+
+		Mapped<CohortDefinition> mc = new Mapped<CohortDefinition>();
+		mc.setParameterizable(cd);
+		mc.addParameterMapping("facility", f);
+		r.setBaseCohort(mc);
+
+		Mapped<ReportDefinition> mp = new Mapped<ReportDefinition>();
+		mp.setParameterizable(rd);
+		mp.addParameterMapping("facility", f);
+		r.setReportDefinition(mp);
+
+		RenderingMode rm = new RenderingMode();
+		rm.setLabel("Excel");
+		rm.setArgument("MOH 361A 0.1");
+		rm.setSortWeight(1);
+		rm.setRenderer(new MOH361AExcelRenderer());
+		r.setRenderingMode(rm);
+
+		Calendar c = Calendar.getInstance();
+		c.set(2001, Calendar.JANUARY, 1);
+
+		r.setDescription("MOH 361A 0.1 (description)");
+		r.setEvaluateStartDatetime(c.getTime());
+		r.setEvaluateCompleteDatetime(new Date());
+		r.setPriority(ReportRequest.Priority.HIGHEST);
+		r.setStatus(ReportRequest.Status.REQUESTED);
+
+		Context.getService(ReportService.class).saveReportRequest(r);
 	}
 }
