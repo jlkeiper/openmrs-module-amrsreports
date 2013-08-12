@@ -135,9 +135,9 @@ public class MOH361AReportProvider_0_1 extends ReportProvider {
 		// d. Patient's Name
 		dsd.addColumn("Name", new PreferredNameDataDefinition(), nullString);
 
-		// e1. Date of Birth
-		dsd.addColumn("Date of Birth", new BirthdateDataDefinition(), nullString,
-				new BirthdateConverter(MOHReportUtil.DATE_FORMAT));
+//		// e1. Date of Birth
+//		dsd.addColumn("Date of Birth", new BirthdateDataDefinition(), nullString,
+//				new BirthdateConverter(MOHReportUtil.DATE_FORMAT));
 
 		// e2. Age at Enrollment
 
