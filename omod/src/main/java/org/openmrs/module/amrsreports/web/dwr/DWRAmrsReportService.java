@@ -428,6 +428,7 @@ public class DWRAmrsReportService {
 		if (rd == null) {
 			rd = p.getReportDefinition();
 			rd.setUuid(reportDefinitionUUID);
+			rd.addParameter(new Parameter("facility", "Facility", MOHFacility.class));
 			Context.getService(ReportDefinitionService.class).saveDefinition(rd);
 		}
 
@@ -437,6 +438,7 @@ public class DWRAmrsReportService {
 		if (cd == null) {
 			cd = p.getCohortDefinition();
 			cd.setUuid(cohortDefinitionUUID);
+			cd.addParameter(new Parameter("facility", "Facility", MOHFacility.class));
 			Context.getService(CohortDefinitionService.class).saveDefinition(cd);
 		}
 
@@ -444,9 +446,6 @@ public class DWRAmrsReportService {
 		MOHFacility f = Context.getService(MOHFacilityService.class).getFacility(27);
 
 		ReportRequest r = new ReportRequest();
-
-		cd.addParameter(new Parameter("facility", "Facility", MOHFacility.class));
-		rd.addParameter(new Parameter("facility", "Facility", MOHFacility.class));
 
 		Mapped<CohortDefinition> mc = new Mapped<CohortDefinition>();
 		mc.setParameterizable(cd);
@@ -471,6 +470,7 @@ public class DWRAmrsReportService {
 		r.setDescription("MOH 361A 0.1 (description)");
 		r.setEvaluateStartDatetime(c.getTime());
 		r.setEvaluateCompleteDatetime(new Date());
+		r.setProcessAutomatically(true);
 		r.setPriority(ReportRequest.Priority.HIGHEST);
 		r.setStatus(ReportRequest.Status.REQUESTED);
 
