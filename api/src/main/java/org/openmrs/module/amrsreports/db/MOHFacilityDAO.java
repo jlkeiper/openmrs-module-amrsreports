@@ -25,11 +25,13 @@ public interface MOHFacilityDAO {
 
 	public Map<String, Integer> getFacilityCodeToLatestSerialNumberMap();
 
-	public Cohort getPatientsInCohortMissingCCCNumbers(Cohort c);
+	public List<Integer> getPatientsInCohortMissingCCCNumbers(List<Integer> c);
 
 	public Integer getLatestSerialNumberForFacility(MOHFacility facility);
 
-	public Cohort getEnrolledPatientsForFacility(MOHFacility facility);
+	public List<Integer> getEnrolledPatientsForFacility(MOHFacility facility);
 
 	public MOHFacility getFacilityByUuid(String uuid);
+
+	public Map<Integer, String> getSerialNumberMapForFacility(MOHFacility facility);
 }
