@@ -1,6 +1,7 @@
 package org.openmrs.module.amrsreports.reporting.provider;
 
 import org.apache.commons.io.IOUtils;
+import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.APIException;
@@ -15,6 +16,7 @@ import org.openmrs.module.amrsreports.reporting.converter.DecimalAgeConverter;
 import org.openmrs.module.amrsreports.reporting.converter.EncounterDatetimeConverter;
 import org.openmrs.module.amrsreports.reporting.converter.EntryPointConverter;
 import org.openmrs.module.amrsreports.reporting.converter.PMTCTDatesConverter;
+import org.openmrs.module.amrsreports.reporting.converter.PersonNameConverter;
 import org.openmrs.module.amrsreports.reporting.converter.WHOStageAndDateConverter;
 import org.openmrs.module.amrsreports.reporting.data.CohortRestrictedAgeAtDateOfOtherDataDefinition;
 import org.openmrs.module.amrsreports.reporting.data.CohortRestrictedBirthdateDataDefinition;
@@ -59,7 +61,6 @@ import org.openmrs.util.OpenmrsClassLoader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -67,6 +68,8 @@ import java.util.Properties;
  * Provides mechanisms for rendering the MOH 361A Pre-ART Register
  */
 public class MOH361AReportProvider_0_1 extends ReportProvider {
+
+	public static final String NAME = "MOH 361A 0.1";
 
 	public MOH361AReportProvider_0_1() {
 		this.name = "MOH 361A 0.1";
@@ -122,26 +125,30 @@ public class MOH361AReportProvider_0_1 extends ReportProvider {
 		CohortRestrictedPatientIdentifierDataDefinition cccColumn = new CohortRestrictedPatientIdentifierDataDefinition(
 				"CCC", pit);
 		cccColumn.setIncludeFirstNonNullOnly(true);
-		dsd.addColumn("Unique Patient Number", cccColumn, nullString);
+		dsd.addColumn("Unique Patient Number", cccColumn, nullString,
+				new PropertyConverter(PatientIdentifier.class, "identifier"));
 
 		// AMRS Universal ID
 		CohortRestrictedPatientIdentifierDataDefinition uidColumn = new CohortRestrictedPatientIdentifierDataDefinition(
 				"AMRS Universal ID", Context.getPatientService().getPatientIdentifierType(8));
 		uidColumn.setIncludeFirstNonNullOnly(true);
-		dsd.addColumn("AMRS Universal ID", uidColumn, nullString);
+		dsd.addColumn("AMRS Universal ID", uidColumn, nullString,
+				new PropertyConverter(PatientIdentifier.class, "identifier"));
 
 		// AMRS Medical Record Number
 		CohortRestrictedPatientIdentifierDataDefinition mrnColumn = new CohortRestrictedPatientIdentifierDataDefinition(
 				"AMRS Medical Record Number", Context.getPatientService().getPatientIdentifierType(3));
 		mrnColumn.setIncludeFirstNonNullOnly(true);
-		dsd.addColumn("AMRS Medical Record Number", mrnColumn, nullString);
+		dsd.addColumn("AMRS Medical Record Number", mrnColumn, nullString,
+				new PropertyConverter(PatientIdentifier.class, "identifier"));
 
 		// d. Patient's Name
-		dsd.addColumn("Name", new CohortRestrictedPreferredNameDataDefinition(), nullString);
+		dsd.addColumn("Name", new CohortRestrictedPreferredNameDataDefinition(), nullString,
+				new PersonNameConverter());
 
-//		// e1. Date of Birth
-//		dsd.addColumn("Date of Birth", new BirthdateDataDefinition(), nullString,
-//				new BirthdateConverter(MOHReportUtil.DATE_FORMAT));
+		// e1. Date of Birth
+		dsd.addColumn("Date of Birth", new CohortRestrictedBirthdateDataDefinition(), nullString,
+				new BirthdateConverter(MOHReportUtil.DATE_FORMAT));
 
 		// e2. Age at Enrollment
 		MappedData<EnrollmentDateDataDefinition> mappedDef = new MappedData<EnrollmentDateDataDefinition>();
@@ -160,16 +167,6 @@ public class MOH361AReportProvider_0_1 extends ReportProvider {
 
 		// h. Confirmed HIV+ Date
 		dsd.addColumn("Confirmed HIV Date", enrollmentDate, nullString);
-
-//		// i. PEP Start / Stop Date
-//		LogicDataDefinition columnI = new LogicDataDefinition();
-//		columnI.setLogicQuery("\"MOH PEP Start Stop Date\"");
-//		dsd.addColumn("PEP Start / Stop Date", columnI, nullString);
-//
-//		// j. Reasons for PEP use:
-//		LogicDataDefinition columnJ = new LogicDataDefinition();
-//		columnJ.setLogicQuery("\"MOH Reasons For PEP\"");
-//		dsd.addColumn("Reasons for PEP Use", columnJ, nullString);
 
 		// k. CTX startdate and stopdate:
 		dsd.addColumn("CTX Start Stop Date", new CtxStartStopDataDefinition(), nullString);
