@@ -48,7 +48,13 @@ import org.openmrs.module.reporting.data.converter.BirthdateConverter;
 import org.openmrs.module.reporting.data.converter.DateConverter;
 import org.openmrs.module.reporting.data.converter.ObjectFormatter;
 import org.openmrs.module.reporting.data.converter.PropertyConverter;
+import org.openmrs.module.reporting.data.patient.definition.PatientIdentifierDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.AgeAtDateOfOtherDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.BirthdateDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.GenderDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.PersonAttributeDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.PersonIdDataDefinition;
+import org.openmrs.module.reporting.data.person.definition.PreferredNameDataDefinition;
 import org.openmrs.module.reporting.dataset.definition.PatientDataSetDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.openmrs.module.reporting.report.ReportDesign;
@@ -122,48 +128,46 @@ public class MOH361AReportProvider_0_1 extends ReportProvider {
 
 		// c. Unique Patient Number
 		PatientIdentifierType pit = service.getCCCNumberIdentifierType();
-		CohortRestrictedPatientIdentifierDataDefinition cccColumn = new CohortRestrictedPatientIdentifierDataDefinition(
-				"CCC", pit);
+		PatientIdentifierDataDefinition cccColumn = new PatientIdentifierDataDefinition("CCC", pit);
 		cccColumn.setIncludeFirstNonNullOnly(true);
 		dsd.addColumn("Unique Patient Number", cccColumn, nullString,
 				new PropertyConverter(PatientIdentifier.class, "identifier"));
 
 		// AMRS Universal ID
-		CohortRestrictedPatientIdentifierDataDefinition uidColumn = new CohortRestrictedPatientIdentifierDataDefinition(
+		PatientIdentifierDataDefinition uidColumn = new PatientIdentifierDataDefinition(
 				"AMRS Universal ID", Context.getPatientService().getPatientIdentifierType(8));
 		uidColumn.setIncludeFirstNonNullOnly(true);
 		dsd.addColumn("AMRS Universal ID", uidColumn, nullString,
 				new PropertyConverter(PatientIdentifier.class, "identifier"));
 
 		// AMRS Medical Record Number
-		CohortRestrictedPatientIdentifierDataDefinition mrnColumn = new CohortRestrictedPatientIdentifierDataDefinition(
+		PatientIdentifierDataDefinition mrnColumn = new PatientIdentifierDataDefinition(
 				"AMRS Medical Record Number", Context.getPatientService().getPatientIdentifierType(3));
 		mrnColumn.setIncludeFirstNonNullOnly(true);
 		dsd.addColumn("AMRS Medical Record Number", mrnColumn, nullString,
 				new PropertyConverter(PatientIdentifier.class, "identifier"));
 
 		// d. Patient's Name
-		dsd.addColumn("Name", new CohortRestrictedPreferredNameDataDefinition(), nullString,
-				new PersonNameConverter());
+		dsd.addColumn("Name", new PreferredNameDataDefinition(), nullString, new PersonNameConverter());
 
 		// e1. Date of Birth
-		dsd.addColumn("Date of Birth", new CohortRestrictedBirthdateDataDefinition(), nullString,
+		dsd.addColumn("Date of Birth", new BirthdateDataDefinition(), nullString,
 				new BirthdateConverter(MOHReportUtil.DATE_FORMAT));
 
 		// e2. Age at Enrollment
 		MappedData<EnrollmentDateDataDefinition> mappedDef = new MappedData<EnrollmentDateDataDefinition>();
 		mappedDef.setParameterizable(enrollmentDate);
 		mappedDef.addConverter(new DateConverter());
-		CohortRestrictedAgeAtDateOfOtherDataDefinition ageAtEnrollment = new CohortRestrictedAgeAtDateOfOtherDataDefinition();
+		AgeAtDateOfOtherDataDefinition ageAtEnrollment = new AgeAtDateOfOtherDataDefinition();
 		ageAtEnrollment.setEffectiveDateDefinition(mappedDef);
 		dsd.addColumn("Age at Enrollment", ageAtEnrollment, nullString, new DecimalAgeConverter(2));
 
 		// f. Sex
-		dsd.addColumn("Sex", new CohortRestrictedGenderDataDefinition(), nullString);
+		dsd.addColumn("Sex", new GenderDataDefinition(), nullString);
 
 		// g. Entry point: From where?
 		PersonAttributeType pat = Context.getPersonService().getPersonAttributeTypeByName(MohEvaluableNameConstants.POINT_OF_HIV_TESTING);
-		dsd.addColumn("Entry Point", new CohortRestrictedPersonAttributeDataDefinition("entryPoint", pat), nullString, new EntryPointConverter());
+		dsd.addColumn("Entry Point", new PersonAttributeDataDefinition("entryPoint", pat), nullString, new EntryPointConverter());
 
 		// h. Confirmed HIV+ Date
 		dsd.addColumn("Confirmed HIV Date", enrollmentDate, nullString);
@@ -210,7 +214,7 @@ public class MOH361AReportProvider_0_1 extends ReportProvider {
 				new PropertyConverter(ObsRepresentation.class, "valueDatetime"));
 
 		// transfer status column (used for sorting, not needed in output)
-		dsd.addColumn("Transfer Status", new TransferStatusDataDefinition(), nullString);
+		dsd.addColumn("Transfer Status", new TransferStatusDataDefinition(), "facility=${facility}");
 
 		Map<String, Object> mappings = new HashMap<String, Object>();
 		mappings.put("facility", "${facility}");
