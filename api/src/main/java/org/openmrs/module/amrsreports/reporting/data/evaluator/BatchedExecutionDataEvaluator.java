@@ -57,17 +57,17 @@ public abstract class BatchedExecutionDataEvaluator<T extends DataRepresentation
 		if (!doBefore(context, c, cohort))
 			return c;
 
-		// create cohort partitions
-		int partitionSize = AmrsReportsConstants.DEFAULT_BATCH_SIZE;
-		List<Cohort> partitions = new LinkedList<Cohort>();
-		List<Integer> ids = new ArrayList<Integer>();
-		ids.addAll(cohort.getMemberIds());
-		for (int i = 0; i < ids.size(); i += partitionSize) {
-			partitions.add(new Cohort(ids.subList(i,
-					i + Math.min(partitionSize, ids.size() - i))));
-		}
-
-		log.info("number of partitions: " + partitions.size());
+//		// create cohort partitions
+//		int partitionSize = AmrsReportsConstants.DEFAULT_BATCH_SIZE;
+//		List<Cohort> partitions = new LinkedList<Cohort>();
+//		List<Integer> ids = new ArrayList<Integer>();
+//		ids.addAll(cohort.getMemberIds());
+//		for (int i = 0; i < ids.size(); i += partitionSize) {
+//			partitions.add(new Cohort(ids.subList(i,
+//					i + Math.min(partitionSize, ids.size() - i))));
+//		}
+//
+//		log.info("number of partitions: " + partitions.size());
 
 		Map<String, Object> m = getSubstitutions(context);
 
@@ -75,20 +75,21 @@ public abstract class BatchedExecutionDataEvaluator<T extends DataRepresentation
 
 		DataSetQueryService qs = Context.getService(DataSetQueryService.class);
 
-		// calculate for [partition] people at a time
-		for (Cohort partition : partitions) {
+//		// calculate for [partition] people at a time
+//		for (Cohort partition : partitions) {
 
-			m.put("personIds", partition);
+//			m.put("personIds", partition);
+			m.put("personIds", cohort);
 
-			StopWatch timer = new StopWatch();
-			timer.start();
+//			StopWatch timer = new StopWatch();
+//			timer.start();
 
 			List<Object> queryResult = qs.executeHqlQuery(hql, m);
 
-			timer.stop();
-			String timeGetting = timer.toString();
-			timer.reset();
-			timer.start();
+//			timer.stop();
+//			String timeGetting = timer.toString();
+//			timer.reset();
+//			timer.start();
 
 			SortedSetMap<Integer, T> results = new SortedSetMap<Integer, T>();
 			results.setSetComparator(getResultsComparator());
@@ -99,23 +100,23 @@ public abstract class BatchedExecutionDataEvaluator<T extends DataRepresentation
 				results.putInList(t.getPersonId(), t);
 			}
 
-			timer.stop();
-			String timeLoading = timer.toString();
-			timer.reset();
-			timer.start();
+//			timer.stop();
+//			String timeLoading = timer.toString();
+//			timer.reset();
+//			timer.start();
 
 			for (Integer pId : results.keySet()) {
 				c.addData(pId, doExecute(pId, results.get(pId), context));
 			}
 
-			Context.flushSession();
-			Context.clearSession();
-
-			timer.stop();
-			String timeConsuming = timer.toString();
-
-			log.info(String.format("Getting: %s | Loading: %s | Consuming: %s | Patients: %d", timeGetting, timeLoading, timeConsuming, partition.size()));
-		}
+//			Context.flushSession();
+//			Context.clearSession();
+//
+//			timer.stop();
+//			String timeConsuming = timer.toString();
+//
+//			log.info(String.format("Getting: %s | Loading: %s | Consuming: %s | Patients: %d", timeGetting, timeLoading, timeConsuming, partition.size()));
+//		}
 
 		// perform post-actions, return the data if it failed
 		doAfter(context, c);
