@@ -4,7 +4,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
-import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.AdministrationService;
@@ -12,8 +11,9 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.amrsreports.HIVCareEnrollment;
 import org.openmrs.module.amrsreports.MOHFacility;
 import org.openmrs.module.amrsreports.reporting.cohort.definition.Moh361ACohortDefinition;
+import org.openmrs.module.amrsreports.reporting.provider.MOH361AReportProvider_0_1;
 import org.openmrs.module.amrsreports.reporting.provider.ReportProvider;
-import org.openmrs.module.amrsreports.reporting.report.renderer.MOH361AExcelRenderer;
+import org.openmrs.module.amrsreports.reporting.report.renderer.AMRSReportsExcelRenderer;
 import org.openmrs.module.amrsreports.service.HIVCareEnrollmentService;
 import org.openmrs.module.amrsreports.service.MOHFacilityService;
 import org.openmrs.module.amrsreports.service.ReportProviderRegistrar;
@@ -31,11 +31,11 @@ import org.openmrs.module.reporting.report.ReportRequest;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
 import org.openmrs.module.reporting.report.renderer.RenderingMode;
+import org.openmrs.module.reporting.report.renderer.SimpleHtmlReportRenderer;
 import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.scheduler.TaskDefinition;
 import org.openmrs.util.OpenmrsUtil;
 import org.openmrs.util.PrivilegeConstants;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.http.HttpServletResponse;
@@ -405,7 +405,7 @@ public class DWRAmrsReportService {
 		return false;
 	}
 
-	public void queueAReport() {
+	public void queueAReport(Integer facilityId) {
 		String cohortDefinitionUUID = "MOH361ACohort0000000000000000000000000";
 		String reportDefinitionUUID = "MOH361A0100000000000000000000000000000";
 
@@ -435,8 +435,11 @@ public class DWRAmrsReportService {
 			Context.getService(CohortDefinitionService.class).saveDefinition(cd);
 		}
 
-		// Chepsaita
-		MOHFacility f = Context.getService(MOHFacilityService.class).getFacility(27);
+		// get the facility
+		MOHFacility f = Context.getService(MOHFacilityService.class).getFacility(facilityId);
+		if (f == null) {
+			return;
+		}
 
 		ReportRequest r = new ReportRequest();
 
@@ -452,10 +455,12 @@ public class DWRAmrsReportService {
 
 		RenderingMode rm = new RenderingMode();
 		rm.setLabel("Excel");
-		rm.setArgument("MOH 361A 0.1");
+		rm.setArgument(MOH361AReportProvider_0_1.NAME);
 		rm.setSortWeight(1);
-		rm.setRenderer(new MOH361AExcelRenderer());
+		rm.setRenderer(new AMRSReportsExcelRenderer());
 		r.setRenderingMode(rm);
+
+		// rm.setRenderer(new SimpleHtmlReportRenderer());
 
 		Calendar c = Calendar.getInstance();
 		c.set(2001, Calendar.JANUARY, 1);

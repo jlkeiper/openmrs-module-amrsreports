@@ -14,19 +14,15 @@
 
 package org.openmrs.module.amrsreports.reporting.report.renderer;
 
-import org.openmrs.module.amrsreports.reporting.provider.MOH361AReportProvider_0_1;
 import org.openmrs.module.amrsreports.reporting.provider.ReportProvider;
 import org.openmrs.module.amrsreports.service.ReportProviderRegistrar;
 import org.openmrs.module.reporting.report.ReportDesign;
 import org.openmrs.module.reporting.report.renderer.ExcelTemplateRenderer;
 
-public class MOH361AExcelRenderer extends ExcelTemplateRenderer {
+public class AMRSReportsExcelRenderer extends ExcelTemplateRenderer {
 
 	public ReportDesign getDesign(String argument) {
-
-		ReportProvider rp = ReportProviderRegistrar.getInstance().getReportProviderByName(
-				MOH361AReportProvider_0_1.NAME);
-
+		ReportProvider rp = ReportProviderRegistrar.getInstance().getReportProviderByName(argument);
 		return rp.getReportDesign();
 	}
 

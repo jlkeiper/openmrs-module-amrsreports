@@ -116,7 +116,7 @@
             DWRAmrsReportService.assignMissingIdentifiersForFacility(Integer facilityId);
             DWRAmrsReportService.getPreARTEnrollmentLocationUuidForPatientUuid(String patientUuid);
             DWRAmrsReportService.isReportRunnerScheduledTaskOn();
-            DWRAmrsReportService.queueAReport();
+            DWRAmrsReportService.queueAReport(Integer facilityId);
 			]]>
         </signatures>
     </dwr>
