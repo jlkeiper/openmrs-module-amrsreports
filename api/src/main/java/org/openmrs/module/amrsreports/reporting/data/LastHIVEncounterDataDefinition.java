@@ -1,6 +1,5 @@
 package org.openmrs.module.amrsreports.reporting.data;
 
-import org.openmrs.Encounter;
 import org.openmrs.module.amrsreports.reporting.common.EncounterRepresentation;
 import org.openmrs.module.reporting.data.BaseDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.PersonDataDefinition;
