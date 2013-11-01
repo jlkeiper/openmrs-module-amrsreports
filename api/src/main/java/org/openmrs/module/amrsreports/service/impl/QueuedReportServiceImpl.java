@@ -12,7 +12,9 @@ import org.openmrs.module.amrsreports.AmrsReportsConstants;
 import org.openmrs.module.amrsreports.MOHFacility;
 import org.openmrs.module.amrsreports.QueuedReport;
 import org.openmrs.module.amrsreports.db.QueuedReportDAO;
+import org.openmrs.module.amrsreports.reporting.provider.MOH361AReportProvider_0_1;
 import org.openmrs.module.amrsreports.reporting.provider.ReportProvider;
+import org.openmrs.module.amrsreports.reporting.report.renderer.AMRSReportsExcelRenderer;
 import org.openmrs.module.amrsreports.service.QueuedReportService;
 import org.openmrs.module.amrsreports.service.ReportProviderRegistrar;
 import org.openmrs.module.amrsreports.service.UserFacilityService;
@@ -21,12 +23,16 @@ import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
+import org.openmrs.module.reporting.evaluation.parameter.Mapped;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.openmrs.module.reporting.report.ReportData;
 import org.openmrs.module.reporting.report.ReportDesign;
+import org.openmrs.module.reporting.report.ReportRequest;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
 import org.openmrs.module.reporting.report.renderer.ExcelTemplateRenderer;
+import org.openmrs.module.reporting.report.renderer.RenderingMode;
+import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.util.OpenmrsUtil;
 
 import java.io.BufferedOutputStream;
@@ -58,7 +64,52 @@ public class QueuedReportServiceImpl implements QueuedReportService {
 
 	@Override
 	public void processQueuedReport(QueuedReport queuedReport) throws EvaluationException, IOException {
+		// validate
+		if (queuedReport.getReportName() == null)
+			throw new APIException("The queued report must reference a report provider by name.");
 
+		if (queuedReport.getFacility() == null)
+			throw new APIException("The queued report must reference a facility.");
+
+		// find the report provider
+		ReportProvider reportProvider = ReportProviderRegistrar.getInstance().getReportProviderByName(queuedReport.getReportName());
+
+		// build a report request
+		ReportRequest rr = buildReportRequest(queuedReport);
+
+		// submit it
+		Context.getService(ReportService.class).queueReport(rr);
+
+		// mark original QueuedReport as submitted and save status
+		queuedReport.setStatus(QueuedReport.STATUS_SUBMITTED);
+		Context.getService(QueuedReportService.class).saveQueuedReport(queuedReport);
+
+		// update schedule if needed
+		if (queuedReport.getRepeatInterval() != null && queuedReport.getRepeatInterval() > 0) {
+
+			//create a new QueuedReport borrowing some values from the run report
+			QueuedReport newQueuedReport = new QueuedReport();
+			newQueuedReport.setFacility(queuedReport.getFacility());
+			newQueuedReport.setReportName(queuedReport.getReportName());
+
+			//compute date for next schedule
+			Calendar newScheduleDate = Calendar.getInstance();
+			newScheduleDate.setTime(queuedReport.getDateScheduled());
+			newScheduleDate.add(Calendar.SECOND, newScheduleDate.get(Calendar.SECOND) + queuedReport.getRepeatInterval());
+			Date nextSchedule = newScheduleDate.getTime();
+
+			//set date for next schedule
+			newQueuedReport.setDateScheduled(nextSchedule);
+			newQueuedReport.setEvaluationDate(nextSchedule);
+
+			newQueuedReport.setStatus(QueuedReport.STATUS_NEW);
+			newQueuedReport.setRepeatInterval(queuedReport.getRepeatInterval());
+
+			Context.getService(QueuedReportService.class).saveQueuedReport(newQueuedReport);
+		}
+	}
+
+	public void oldWay(QueuedReport queuedReport) throws EvaluationException, IOException {
 		// validate
 		if (queuedReport.getReportName() == null)
 			throw new APIException("The queued report must reference a report provider by name.");
@@ -240,6 +291,78 @@ public class QueuedReportServiceImpl implements QueuedReportService {
 	@Override
 	public List<QueuedReport> getQueuedReportsByFacilities(List<MOHFacility> facilities, String status) {
 		return dao.getQueuedReportsByFacilities(facilities, status);
+	}
+
+	@Override
+	public void updateCohortDefinition(CohortDefinition cd) {
+		CohortDefinition existing = Context.getService(CohortDefinitionService.class).getDefinitionByUuid(cd.getUuid());
+		if (existing != null) {
+			Context.getService(CohortDefinitionService.class).purgeDefinition(existing);
+			Context.flushSession();
+		}
+		Context.getService(CohortDefinitionService.class).saveDefinition(cd);
+	}
+
+	@Override
+	public void updateReportDefinition(ReportDefinition rd) {
+		ReportDefinition existing = Context.getService(ReportDefinitionService.class).getDefinitionByUuid(rd.getUuid());
+		if (existing != null) {
+			Context.getService(ReportDefinitionService.class).purgeDefinition(existing);
+			Context.flushSession();
+		}
+		Context.getService(ReportDefinitionService.class).saveDefinition(rd);
+	}
+
+	private ReportRequest buildReportRequest(QueuedReport queuedReport) throws EvaluationException {
+
+		if (queuedReport == null) {
+			throw new EvaluationException("Could not evaluate a null queued report.");
+		}
+
+		// get the provider
+		ReportProvider p = ReportProviderRegistrar.getInstance().getReportProviderByName(queuedReport.getReportName());
+		if (p == null) {
+			throw new EvaluationException("No report provider by the name of " + queuedReport.getReportName());
+		}
+
+		// get the facility
+		MOHFacility f = queuedReport.getFacility();
+		if (f == null) {
+			throw new EvaluationException("No facility found on the queued report.");
+		}
+
+		// build the request
+		ReportRequest r = new ReportRequest();
+
+		Mapped<CohortDefinition> mc = new Mapped<CohortDefinition>();
+		mc.setParameterizable(p.getCohortDefinition());
+		mc.addParameterMapping("facility", f);
+		r.setBaseCohort(mc);
+
+		Mapped<ReportDefinition> mp = new Mapped<ReportDefinition>();
+		mp.setParameterizable(p.getReportDefinition());
+		mp.addParameterMapping("facility", f);
+		r.setReportDefinition(mp);
+
+		RenderingMode rm = new RenderingMode();
+		rm.setLabel("Excel");
+		rm.setArgument(MOH361AReportProvider_0_1.NAME);
+		rm.setSortWeight(1);
+		rm.setRenderer(new AMRSReportsExcelRenderer());
+		r.setRenderingMode(rm);
+
+		// rm.setRenderer(new SimpleHtmlReportRenderer());
+
+//		Calendar c = Calendar.getInstance();
+//		c.set(2001, Calendar.JANUARY, 1);
+
+		r.setDescription("MOH 361A 0.1 (description)");
+		r.setEvaluationDate(queuedReport.getEvaluationDate());
+//		r.setEvaluateStartDatetime(c.getTime());
+//		r.setEvaluateCompleteDatetime(new Date());
+		r.setProcessAutomatically(true);
+
+		return r;
 	}
 
 }
