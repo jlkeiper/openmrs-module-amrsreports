@@ -77,10 +77,10 @@
                     </c:forEach>
 
                     <c:if test="${extra == true}">
-                        </div>
-                    </c:if>
                 </div>
+                </c:if>
             </div>
-        </c:forEach>
     </div>
+    </c:forEach>
+</div>
 </div>

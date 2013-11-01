@@ -50,6 +50,7 @@
 
         return "every " + repeatInterval + " " + units;
     }
+
 </script>
 
 <%@ include file="localHeader.jsp" %>
