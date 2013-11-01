@@ -48,7 +48,7 @@
 
 	<properties>
         <calculationVersion>1.0</calculationVersion>
-        <reportingVersion>0.7.5</reportingVersion>
+        <reportingVersion>0.8.1-SNAPSHOT</reportingVersion>
         <serializationVersion>0.2.7</serializationVersion>
         <htmlWidgetsVersion>1.6.0</htmlWidgetsVersion>
         <logicVersion>0.5.1</logicVersion>
