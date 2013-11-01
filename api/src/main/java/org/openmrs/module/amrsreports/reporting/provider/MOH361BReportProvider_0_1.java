@@ -5,6 +5,7 @@ import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.amrsreports.MOHFacility;
 import org.openmrs.module.amrsreports.reporting.cohort.definition.Moh361BCohortDefinition;
 import org.openmrs.module.amrsreports.reporting.converter.DateListCustomConverter;
 import org.openmrs.module.amrsreports.reporting.converter.DecimalAgeConverter;
@@ -28,6 +29,7 @@ import org.openmrs.module.reporting.data.person.definition.ObsForPersonDataDefin
 import org.openmrs.module.reporting.data.person.definition.PersonIdDataDefinition;
 import org.openmrs.module.reporting.data.person.definition.PreferredAddressDataDefinition;
 import org.openmrs.module.reporting.dataset.definition.PatientDataSetDefinition;
+import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.openmrs.module.reporting.report.ReportDesign;
 import org.openmrs.module.reporting.report.ReportDesignResource;
 import org.openmrs.module.reporting.report.definition.PeriodIndicatorReportDefinition;
@@ -47,6 +49,8 @@ public class MOH361BReportProvider_0_1 extends ReportProvider {
 
 	public static final String CONTACT_PHONE_ATTRIBUTE_TYPE = "Contact Phone Number";
 	private static final String MONTH_AND_YEAR_FORMAT = "MM/yyyy";
+	public static final String NAME = "MOH 361B 0.1-SNAPSHOT";
+	public static final String REPORT_UUID = "MOH361B-01Report0000000000000000000000";
 
 	public MOH361BReportProvider_0_1() {
 		this.name = "MOH 361B 0.1-SNAPSHOT";
@@ -60,11 +64,18 @@ public class MOH361BReportProvider_0_1 extends ReportProvider {
 		MohCoreService service = Context.getService(MohCoreService.class);
 
 		ReportDefinition report = new PeriodIndicatorReportDefinition();
-		report.setName("MOH 361B Report");
+		report.setName(NAME);
 
 		// set up the DSD
 		PatientDataSetDefinition dsd = new PatientDataSetDefinition();
 		dsd.setName("allPatients");
+
+		// set up parameters
+		Parameter facility = new Parameter("facility", "Facility", MOHFacility.class);
+
+		// add to report and data set definition
+		report.addParameter(facility);
+		dsd.addParameter(facility);
 
 		// set up the columns ...
 
@@ -149,7 +160,7 @@ public class MOH361BReportProvider_0_1 extends ReportProvider {
 		// m. CTX start date
 		dsd.addColumn("CTX Start Dates", new CtxStartDataDefinition(), nullString, new DateListCustomConverter(MONTH_AND_YEAR_FORMAT));
 
-		// ah. 6 month CD4 count (and aq, az, bi)
+		// ah. 6 month weight (and aq, az, bi)
 		ObsForPersonDataDefinition sixMonthWeight = new ObsForPersonDataDefinition(
 				"6 Month Weight",
 				null,
@@ -163,6 +174,9 @@ public class MOH361BReportProvider_0_1 extends ReportProvider {
 		dsd.addColumn("24 Month Weight", sixMonthWeight, nullString, new IntervalObsValueNumericConverter(2, 24));
 
 		report.addDataSetDefinition(dsd, null);
+
+		// ensure the UUID is always the same
+		report.setUuid(REPORT_UUID);
 
 		return report;
 	}

@@ -20,6 +20,7 @@ public class QueuedReport extends BaseOpenmrsObject {
 	private String xlsFilename;
 
 	public static final String STATUS_NEW = "NEW";
+	public static final String STATUS_SUBMITTED = "SUBMITTED";
 	public static final String STATUS_ERROR = "ERROR";
 	public static final String STATUS_RUNNING = "RUNNING";
 	public static final String STATUS_COMPLETE = "COMPLETE";

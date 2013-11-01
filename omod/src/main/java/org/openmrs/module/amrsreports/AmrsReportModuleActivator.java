@@ -15,11 +15,15 @@ package org.openmrs.module.amrsreports;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.Activator;
+import org.openmrs.module.ModuleActivator;
 import org.openmrs.module.amrsreports.reporting.provider.JerTestReportProvider;
 import org.openmrs.module.amrsreports.reporting.provider.MOH361AReportProvider_0_1;
 import org.openmrs.module.amrsreports.reporting.provider.MOH361AReportProvider_0_2;
 import org.openmrs.module.amrsreports.reporting.provider.MOH361BReportProvider_0_1;
+import org.openmrs.module.amrsreports.reporting.provider.ReportProvider;
+import org.openmrs.module.amrsreports.service.QueuedReportService;
 import org.openmrs.module.amrsreports.service.ReportProviderRegistrar;
 import org.openmrs.module.amrsreports.util.TaskRunnerThread;
 
@@ -27,7 +31,7 @@ import org.openmrs.module.amrsreports.util.TaskRunnerThread;
  * This class contains the logic that is run every time this module is either started or shutdown
  */
 @SuppressWarnings("deprecation")
-public class AmrsReportModuleActivator implements Activator {
+public class AmrsReportModuleActivator implements ModuleActivator {
 	
 	private Log log = LogFactory.getLog(this.getClass());
 	
@@ -36,14 +40,10 @@ public class AmrsReportModuleActivator implements Activator {
 	 */
 	public void startup() {
 		log.info("Starting AMRS Reporting Module");
-
-		// TODO use some classpath or Spring magic to acquire these automatically
-		ReportProviderRegistrar.getInstance().registerReportProvider(new MOH361AReportProvider_0_1());
-		ReportProviderRegistrar.getInstance().registerReportProvider(new MOH361AReportProvider_0_2());
-		ReportProviderRegistrar.getInstance().registerReportProvider(new MOH361BReportProvider_0_1());
-		ReportProviderRegistrar.getInstance().registerReportProvider(new JerTestReportProvider());
 	}
-	
+
+
+
 	/**
 	 * @see org.openmrs.module.Activator#shutdown()
 	 */
@@ -56,5 +56,43 @@ public class AmrsReportModuleActivator implements Activator {
 			log.warn("problem destroying Task Runner Thread instance", throwable);
 		}
 	}
-	
+
+	@Override
+	public void willRefreshContext() {
+		//To change body of implemented methods use File | Settings | File Templates.
+	}
+
+	@Override
+	public void contextRefreshed() {
+		//To change body of implemented methods use File | Settings | File Templates.
+	}
+
+	@Override
+	public void willStart() {
+		//To change body of implemented methods use File | Settings | File Templates.
+	}
+
+	@Override
+	public void started() {
+
+		QueuedReportService qrs = Context.getService(QueuedReportService.class);
+
+		// register and update report providers
+		for (ReportProvider p : AmrsReportsConstants.REPORT_PROVIDERS) {
+			ReportProviderRegistrar.getInstance().registerReportProvider(p);
+			qrs.updateCohortDefinition(p.getCohortDefinition());
+			qrs.updateReportDefinition(p.getReportDefinition());
+			log.info("Registered report provider " + p.getName());
+		}
+	}
+
+	@Override
+	public void willStop() {
+		//To change body of implemented methods use File | Settings | File Templates.
+	}
+
+	@Override
+	public void stopped() {
+		//To change body of implemented methods use File | Settings | File Templates.
+	}
 }

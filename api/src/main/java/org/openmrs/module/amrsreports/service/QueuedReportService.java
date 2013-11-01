@@ -2,7 +2,9 @@ package org.openmrs.module.amrsreports.service;
 
 import org.openmrs.module.amrsreports.MOHFacility;
 import org.openmrs.module.amrsreports.QueuedReport;
+import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
+import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -37,4 +39,9 @@ public interface QueuedReportService {
 	@Transactional(readOnly = true)
 	public List<QueuedReport> getQueuedReportsByFacilities(List<MOHFacility> facilities, String status);
 
+	@Transactional
+	public void updateCohortDefinition(CohortDefinition cd);
+
+	@Transactional
+	public void updateReportDefinition(ReportDefinition rd);
 }

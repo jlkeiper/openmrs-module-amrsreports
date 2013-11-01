@@ -1,5 +1,13 @@
 package org.openmrs.module.amrsreports;
 
+import org.openmrs.module.amrsreports.reporting.provider.MOH361AReportProvider_0_1;
+import org.openmrs.module.amrsreports.reporting.provider.MOH361AReportProvider_0_2;
+import org.openmrs.module.amrsreports.reporting.provider.MOH361BReportProvider_0_1;
+import org.openmrs.module.amrsreports.reporting.provider.ReportProvider;
+
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Primary container for all static constants used in this module.  Note: other constant files exist, but will hopefully
  * be migrated into this one eventually or clearly separated by purpose.
@@ -19,5 +27,9 @@ public class AmrsReportsConstants {
 
 	public static final String SAVED_COHORT_UUID = "AMRSReportsTemporaryCohort000000000000";
 
-	public static final Integer DEFAULT_BATCH_SIZE = 1000;
+	public static List<ReportProvider> REPORT_PROVIDERS = Arrays.asList(
+			new MOH361AReportProvider_0_1(),
+			new MOH361AReportProvider_0_2(),
+			new MOH361BReportProvider_0_1()
+	);
 }

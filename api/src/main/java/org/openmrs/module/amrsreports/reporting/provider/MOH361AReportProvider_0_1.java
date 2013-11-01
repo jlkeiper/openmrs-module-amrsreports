@@ -70,6 +70,7 @@ import java.util.Properties;
 public class MOH361AReportProvider_0_1 extends ReportProvider {
 
 	public static final String NAME = "MOH 361A 0.1";
+	public static final String REPORT_UUID = "MOH361A-01Report0000000000000000000000";
 
 	public MOH361AReportProvider_0_1() {
 		this.name = "MOH 361A 0.1";
@@ -84,16 +85,14 @@ public class MOH361AReportProvider_0_1 extends ReportProvider {
 		MohCoreService service = Context.getService(MohCoreService.class);
 
 		ReportDefinition report = new PeriodIndicatorReportDefinition();
-		report.setName("MOH 361A Report");
+		report.setName(NAME);
 
 		// set up the DSD
 		PatientDataSetDefinition dsd = new PatientDataSetDefinition();
 		dsd.setName("allPatients");
 
 		// set up parameters
-		Parameter facility = new Parameter();
-		facility.setName("facility");
-		facility.setType(MOHFacility.class);
+		Parameter facility = new Parameter("facility", "Facility", MOHFacility.class);
 
 		// add to report and data set definition
 		report.addParameter(facility);
@@ -213,6 +212,9 @@ public class MOH361AReportProvider_0_1 extends ReportProvider {
 		Map<String, Object> mappings = new HashMap<String, Object>();
 		mappings.put("facility", "${facility}");
 		report.addDataSetDefinition(dsd, mappings);
+
+		// ensure the UUID is always the same
+		report.setUuid(REPORT_UUID);
 
 		return report;
 	}
