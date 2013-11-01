@@ -11,28 +11,15 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.amrsreports.HIVCareEnrollment;
 import org.openmrs.module.amrsreports.MOHFacility;
 import org.openmrs.module.amrsreports.reporting.cohort.definition.Moh361ACohortDefinition;
-import org.openmrs.module.amrsreports.reporting.provider.MOH361AReportProvider_0_1;
-import org.openmrs.module.amrsreports.reporting.provider.ReportProvider;
-import org.openmrs.module.amrsreports.reporting.report.renderer.AMRSReportsExcelRenderer;
 import org.openmrs.module.amrsreports.service.HIVCareEnrollmentService;
 import org.openmrs.module.amrsreports.service.MOHFacilityService;
-import org.openmrs.module.amrsreports.service.ReportProviderRegistrar;
 import org.openmrs.module.amrsreports.task.AMRSReportsTask;
 import org.openmrs.module.amrsreports.task.RunQueuedReportsTask;
 import org.openmrs.module.amrsreports.task.UpdateHIVCareEnrollmentTask;
 import org.openmrs.module.amrsreports.util.TaskRunnerThread;
-import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
-import org.openmrs.module.reporting.evaluation.parameter.Mapped;
-import org.openmrs.module.reporting.evaluation.parameter.Parameter;
-import org.openmrs.module.reporting.report.ReportRequest;
-import org.openmrs.module.reporting.report.definition.ReportDefinition;
-import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
-import org.openmrs.module.reporting.report.renderer.RenderingMode;
-import org.openmrs.module.reporting.report.renderer.SimpleHtmlReportRenderer;
-import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.scheduler.TaskDefinition;
 import org.openmrs.util.OpenmrsUtil;
 import org.openmrs.util.PrivilegeConstants;
@@ -49,7 +36,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -393,86 +379,16 @@ public class DWRAmrsReportService {
 	public Boolean isReportRunnerScheduledTaskOn() {
 		Context.addProxyPrivilege(PrivilegeConstants.MANAGE_SCHEDULER);
 
-		for (TaskDefinition definition: Context.getSchedulerService().getScheduledTasks()) {
+		for (TaskDefinition definition : Context.getSchedulerService().getScheduledTasks()) {
 			if (OpenmrsUtil.nullSafeEquals(RunQueuedReportsTask.class.getCanonicalName(), definition.getTaskClass())
-				&& definition.getStarted()) {
-					Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_SCHEDULER);
-					return true;
+					&& definition.getStarted()) {
+				Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_SCHEDULER);
+				return true;
 			}
 		}
 
 		Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_SCHEDULER);
 		return false;
-	}
-
-	public void queueAReport(Integer facilityId) {
-		String cohortDefinitionUUID = "MOH361ACohort0000000000000000000000000";
-		String reportDefinitionUUID = "MOH361A0100000000000000000000000000000";
-
-		ReportProvider p = ReportProviderRegistrar.getInstance().getReportProviderByName("MOH 361A 0.1");
-
-		ReportDefinition rd = Context.getService(ReportDefinitionService.class)
-				.getDefinitionByUuid(reportDefinitionUUID);
-
-		// TODO take this out!!!
-		Context.getService(ReportDefinitionService.class).purgeDefinition(rd);
-		rd = null;
-
-		if (rd == null) {
-			rd = p.getReportDefinition();
-			rd.setUuid(reportDefinitionUUID);
-			rd.addParameter(new Parameter("facility", "Facility", MOHFacility.class));
-			Context.getService(ReportDefinitionService.class).saveDefinition(rd);
-		}
-
-		CohortDefinition cd = Context.getService(CohortDefinitionService.class)
-				.getDefinitionByUuid(cohortDefinitionUUID);
-
-		if (cd == null) {
-			cd = p.getCohortDefinition();
-			cd.setUuid(cohortDefinitionUUID);
-			cd.addParameter(new Parameter("facility", "Facility", MOHFacility.class));
-			Context.getService(CohortDefinitionService.class).saveDefinition(cd);
-		}
-
-		// get the facility
-		MOHFacility f = Context.getService(MOHFacilityService.class).getFacility(facilityId);
-		if (f == null) {
-			return;
-		}
-
-		ReportRequest r = new ReportRequest();
-
-		Mapped<CohortDefinition> mc = new Mapped<CohortDefinition>();
-		mc.setParameterizable(cd);
-		mc.addParameterMapping("facility", f);
-		r.setBaseCohort(mc);
-
-		Mapped<ReportDefinition> mp = new Mapped<ReportDefinition>();
-		mp.setParameterizable(rd);
-		mp.addParameterMapping("facility", f);
-		r.setReportDefinition(mp);
-
-		RenderingMode rm = new RenderingMode();
-		rm.setLabel("Excel");
-		rm.setArgument(MOH361AReportProvider_0_1.NAME);
-		rm.setSortWeight(1);
-		rm.setRenderer(new AMRSReportsExcelRenderer());
-		r.setRenderingMode(rm);
-
-		// rm.setRenderer(new SimpleHtmlReportRenderer());
-
-		Calendar c = Calendar.getInstance();
-		c.set(2001, Calendar.JANUARY, 1);
-
-		r.setDescription("MOH 361A 0.1 (description)");
-		r.setEvaluateStartDatetime(c.getTime());
-		r.setEvaluateCompleteDatetime(new Date());
-		r.setProcessAutomatically(true);
-		r.setPriority(ReportRequest.Priority.HIGHEST);
-		r.setStatus(ReportRequest.Status.REQUESTED);
-
-		Context.getService(ReportService.class).saveReportRequest(r);
 	}
 
 }
