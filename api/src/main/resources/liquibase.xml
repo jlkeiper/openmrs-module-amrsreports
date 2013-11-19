@@ -514,4 +514,39 @@
                                  referencedColumnNames="patient_id"/>
     </changeSet>
 
+    <changeSet id="amrsreports-2013-11-08-a" author="jkeiper">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="amrsreports_queued_report" columnName="csv_file_location"/>
+        </preConditions>
+        <comment>
+            Removing csv_file_location to the amrsreports_queued_report table
+        </comment>
+        <dropColumn tableName="amrsreports_queued_report" columnName="csv_file_location" />
+    </changeSet>
+
+    <changeSet id="amrsreports-2013-11-08-b" author="jkeiper">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="amrsreports_queued_report" columnName="xls_file_location"/>
+        </preConditions>
+        <comment>
+            Removing xls_file_location to the amrsreports_queued_report table
+        </comment>
+        <dropColumn tableName="amrsreports_queued_report" columnName="xls_file_location" />
+    </changeSet>
+
+    <changeSet id="amrsreports-2013-11-08-c" author="jkeiper">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="amrsreports_queued_report" columnName="report_request_uuid"/>
+            </not>
+        </preConditions>
+        <comment>
+            Adding report_request_uuid to the amrsreports_queued_report table
+        </comment>
+        <addColumn tableName="amrsreports_queued_report">
+            <column name="report_request_uuid" type="char(38)"/>
+        </addColumn>
+    </changeSet>
+
+
 </databaseChangeLog>

@@ -16,8 +16,7 @@ public class QueuedReport extends BaseOpenmrsObject {
 	private Date dateScheduled = new Date();
 	private String status = STATUS_NEW;
     private Integer repeatInterval = 0;
-	private String csvFilename;
-	private String xlsFilename;
+	private String reportRequestUUID;
 
 	public static final String STATUS_NEW = "NEW";
 	public static final String STATUS_SUBMITTED = "SUBMITTED";
@@ -83,22 +82,6 @@ public class QueuedReport extends BaseOpenmrsObject {
 		setQueuedReportId(id);
 	}
 
-	public String getCsvFilename() {
-		return csvFilename;
-	}
-
-	public void setCsvFilename(String csvFilename) {
-		this.csvFilename = csvFilename;
-	}
-
-	public String getXlsFilename() {
-		return xlsFilename;
-	}
-
-	public void setXlsFilename(String xlsFilename) {
-		this.xlsFilename = xlsFilename;
-	}
-
     public Integer getRepeatInterval() {
         return repeatInterval;
     }
@@ -106,4 +89,12 @@ public class QueuedReport extends BaseOpenmrsObject {
     public void setRepeatInterval(Integer repeatInterval) {
         this.repeatInterval = repeatInterval;
     }
+
+	public String getReportRequestUUID() {
+		return reportRequestUUID;
+	}
+
+	public void setReportRequestUUID(String reportRequestUUID) {
+		this.reportRequestUUID = reportRequestUUID;
+	}
 }
