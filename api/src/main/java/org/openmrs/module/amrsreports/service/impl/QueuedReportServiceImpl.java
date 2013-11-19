@@ -12,6 +12,7 @@ import org.openmrs.module.amrsreports.AmrsReportsConstants;
 import org.openmrs.module.amrsreports.MOHFacility;
 import org.openmrs.module.amrsreports.QueuedReport;
 import org.openmrs.module.amrsreports.db.QueuedReportDAO;
+import org.openmrs.module.amrsreports.event.ReportCompletedEvent;
 import org.openmrs.module.amrsreports.reporting.provider.MOH361AReportProvider_0_1;
 import org.openmrs.module.amrsreports.reporting.provider.ReportProvider;
 import org.openmrs.module.amrsreports.reporting.report.renderer.AMRSReportsExcelRenderer;
@@ -34,6 +35,7 @@ import org.openmrs.module.reporting.report.renderer.ExcelTemplateRenderer;
 import org.openmrs.module.reporting.report.renderer.RenderingMode;
 import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.util.OpenmrsUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -53,6 +55,9 @@ public class QueuedReportServiceImpl implements QueuedReportService {
 	private QueuedReportDAO dao;
 	private final Log log = LogFactory.getLog(this.getClass());
 
+	@Autowired
+	private org.springframework.context.ApplicationContext applicationContext;
+
 	public void setDao(QueuedReportDAO dao) {
 		this.dao = dao;
 	}
@@ -71,17 +76,15 @@ public class QueuedReportServiceImpl implements QueuedReportService {
 		if (queuedReport.getFacility() == null)
 			throw new APIException("The queued report must reference a facility.");
 
-		// find the report provider
-		ReportProvider reportProvider = ReportProviderRegistrar.getInstance().getReportProviderByName(queuedReport.getReportName());
-
 		// build a report request
 		ReportRequest rr = buildReportRequest(queuedReport);
 
 		// submit it
-		Context.getService(ReportService.class).queueReport(rr);
+		rr = Context.getService(ReportService.class).queueReport(rr);
 
 		// mark original QueuedReport as submitted and save status
 		queuedReport.setStatus(QueuedReport.STATUS_SUBMITTED);
+		queuedReport.setReportRequestUUID(rr.getUuid());
 		Context.getService(QueuedReportService.class).saveQueuedReport(queuedReport);
 
 		// update schedule if needed
@@ -107,6 +110,8 @@ public class QueuedReportServiceImpl implements QueuedReportService {
 
 			Context.getService(QueuedReportService.class).saveQueuedReport(newQueuedReport);
 		}
+
+		applicationContext.publishEvent(new ReportCompletedEvent(rr));
 	}
 
 	public void oldWay(QueuedReport queuedReport) throws EvaluationException, IOException {
@@ -205,28 +210,27 @@ public class QueuedReportServiceImpl implements QueuedReportService {
 		File xlsFile = new File(loaddir, xlsFilename);
 		OutputStream stream = new BufferedOutputStream(new FileOutputStream(xlsFile));
 
-		// get the report design
-		final ReportDesign design = reportProvider.getReportDesign();
-
-		// build an Excel template renderer with the report design
-		ExcelTemplateRenderer renderer = new ExcelTemplateRenderer() {
-			public ReportDesign getDesign(String argument) {
-				return design;
-			}
-		};
-
-		// render the Excel template
-		renderer.render(reportData, queuedReport.getReportName(), stream);
-		stream.close();
+//		// get the report design
+//		final ReportDesign design = reportProvider.getReportDesign();
+//
+//		// build an Excel template renderer with the report design
+//		ExcelTemplateRenderer renderer = new ExcelTemplateRenderer() {
+//			public ReportDesign getDesign(String argument) {
+//				return design;
+//			}
+//		};
+//
+//		// render the Excel template
+//		renderer.render(reportData, queuedReport.getReportName(), stream);
+//		stream.close();
 
 		// finish off by setting stuff on the queued report
-		queuedReport.setCsvFilename(csvFilename);
-		queuedReport.setXlsFilename(xlsFilename);
+//		queuedReport.setCsvFilename(csvFilename);
+//		queuedReport.setXlsFilename(xlsFilename);
 
 		//Mark original QueuedReport as complete and save status
 		queuedReport.setStatus(QueuedReport.STATUS_COMPLETE);
 		Context.getService(QueuedReportService.class).saveQueuedReport(queuedReport);
-
 
 		if (queuedReport.getRepeatInterval() != null && queuedReport.getRepeatInterval() > 0) {
 
@@ -351,15 +355,8 @@ public class QueuedReportServiceImpl implements QueuedReportService {
 		rm.setRenderer(new AMRSReportsExcelRenderer());
 		r.setRenderingMode(rm);
 
-		// rm.setRenderer(new SimpleHtmlReportRenderer());
-
-//		Calendar c = Calendar.getInstance();
-//		c.set(2001, Calendar.JANUARY, 1);
-
 		r.setDescription("MOH 361A 0.1 (description)");
 		r.setEvaluationDate(queuedReport.getEvaluationDate());
-//		r.setEvaluateStartDatetime(c.getTime());
-//		r.setEvaluateCompleteDatetime(new Date());
 		r.setProcessAutomatically(true);
 
 		return r;
