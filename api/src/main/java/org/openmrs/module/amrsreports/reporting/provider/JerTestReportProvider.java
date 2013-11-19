@@ -1,13 +1,9 @@
 package org.openmrs.module.amrsreports.reporting.provider;
 
-import org.apache.commons.io.IOUtils;
-import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.amrsreports.MOHFacility;
 import org.openmrs.module.amrsreports.reporting.cohort.definition.Moh361ACohortDefinition;
 import org.openmrs.module.amrsreports.reporting.common.EncounterRepresentation;
-import org.openmrs.module.amrsreports.reporting.converter.EncounterDatetimeConverter;
-import org.openmrs.module.amrsreports.reporting.data.FirstEncounterAtFacilityDataDefinition;
 import org.openmrs.module.amrsreports.reporting.data.LastHIVEncounterDataDefinition;
 import org.openmrs.module.amrsreports.service.MohCoreService;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
@@ -17,18 +13,11 @@ import org.openmrs.module.reporting.data.converter.PropertyConverter;
 import org.openmrs.module.reporting.data.person.definition.PersonIdDataDefinition;
 import org.openmrs.module.reporting.dataset.definition.PatientDataSetDefinition;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
-import org.openmrs.module.reporting.report.ReportDesign;
-import org.openmrs.module.reporting.report.ReportDesignResource;
 import org.openmrs.module.reporting.report.definition.PeriodIndicatorReportDefinition;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
-import org.openmrs.module.reporting.report.renderer.ExcelTemplateRenderer;
-import org.openmrs.util.OpenmrsClassLoader;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Provides mechanisms for rendering the MOH 361A Pre-ART Register
@@ -173,33 +162,12 @@ public class JerTestReportProvider extends ReportProvider {
 	}
 
 	@Override
-	public ReportDesign getReportDesign() {
-		ReportDesign design = new ReportDesign();
-		design.setName("MOH 361A Register Design");
-		design.setReportDefinition(this.getReportDefinition());
-		design.setRendererType(ExcelTemplateRenderer.class);
+	public String getRepeatingSections() {
+		return "sheet:1,row:4,dataset:allPatients";
+	}
 
-		Properties props = new Properties();
-		props.put("repeatingSections", "sheet:1,row:4,dataset:allPatients");
-
-		design.setProperties(props);
-
-		ReportDesignResource resource = new ReportDesignResource();
-		resource.setName("template.xls");
-		InputStream is = OpenmrsClassLoader.getInstance().getResourceAsStream("templates/MOH361AReportTemplate_0_1.xls");
-
-		if (is == null)
-			throw new APIException("Could not find report template.");
-
-		try {
-			resource.setContents(IOUtils.toByteArray(is));
-		} catch (IOException ex) {
-			throw new APIException("Could not create report design for MOH 361A Register.", ex);
-		}
-
-		IOUtils.closeQuietly(is);
-		design.addResource(resource);
-
-		return design;
+	@Override
+	public String getTemplateFilename() {
+		return "MOH361AReportTemplate_0_1.xls";
 	}
 }
