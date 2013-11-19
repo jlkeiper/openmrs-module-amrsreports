@@ -46,9 +46,9 @@
                         <div class="${status.index % 2 == 0 ? "oddRow" : "evenRow"}">
                             <span class="actions">
                                 <c:choose>
-                                    <c:when test="${model.status == 'COMPLETE'}">
+                                    <c:when test="${model.status == 'SUBMITTED'}">
                                         <a href="viewReport.form?reportId=${r.id}">View</a>
-                                        <a href="downloadxls.htm?reportId=${r.id}">Download</a>
+                                        <!-- <a href="downloadxls.htm?reportId=${r.id}">Download</a> -->
                                     </c:when>
                                     <c:when test="${model.status == 'NEW'}">
                                         <a href="queuedReport.form?queuedReportId=${r.id}">Edit</a>

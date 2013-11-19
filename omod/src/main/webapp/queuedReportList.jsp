@@ -63,12 +63,6 @@
                  parameters="status=NEW|title=Queued Reports"/>
 
 <openmrs:portlet id="queuedAMRSReports" moduleId="amrsreports" url="queuedAMRSReports"
-                 parameters="status=RUNNING|title=Running Reports"/>
-
-<openmrs:portlet id="queuedAMRSReports" moduleId="amrsreports" url="queuedAMRSReports"
-                 parameters="status=COMPLETE|title=Completed Reports"/>
-
-<openmrs:portlet id="queuedAMRSReports" moduleId="amrsreports" url="queuedAMRSReports"
-                 parameters="status=ERROR|title=Reports in Error"/>
+                 parameters="status=SUBMITTED|title=Submitted Reports"/>
 
 <%@ include file="/WEB-INF/template/footer.jsp" %>

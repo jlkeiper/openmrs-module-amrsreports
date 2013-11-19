@@ -50,16 +50,16 @@ public class QueuedReportListController {
 			return;
 		}
 
-		String folderName = Context.getAdministrationService().getGlobalProperty("amrsreports.file_dir");
-
-		File fileDir = OpenmrsUtil.getDirectoryInApplicationDataDirectory(folderName);
-		File amrsFileToDownload = new File(fileDir, report.getXlsFilename());
-
-		response.setContentType("application/vnd.ms-excel");
-		response.setHeader("Content-Disposition", "attachment; filename=" + report.getXlsFilename());
-		response.setContentLength((int) amrsFileToDownload.length());
-
-		FileCopyUtils.copy(new FileInputStream(amrsFileToDownload), response.getOutputStream());
+//		String folderName = Context.getAdministrationService().getGlobalProperty("amrsreports.file_dir");
+//
+//		File fileDir = OpenmrsUtil.getDirectoryInApplicationDataDirectory(folderName);
+//		File amrsFileToDownload = new File(fileDir, report.getXlsFilename());
+//
+//		response.setContentType("application/vnd.ms-excel");
+//		response.setHeader("Content-Disposition", "attachment; filename=" + report.getXlsFilename());
+//		response.setContentLength((int) amrsFileToDownload.length());
+//
+//		FileCopyUtils.copy(new FileInputStream(amrsFileToDownload), response.getOutputStream());
 	}
 
 }
