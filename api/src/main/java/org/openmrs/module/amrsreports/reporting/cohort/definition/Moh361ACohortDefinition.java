@@ -6,14 +6,13 @@ import org.openmrs.module.reporting.common.Localized;
 import org.openmrs.module.reporting.definition.configuration.ConfigurationProperty;
 import org.openmrs.module.reporting.definition.configuration.ConfigurationPropertyCachingStrategy;
 import org.openmrs.module.reporting.evaluation.caching.Caching;
-import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 
 /**
  * MOH 361A Register cohort definition
  */
 @Caching(strategy = ConfigurationPropertyCachingStrategy.class)
 @Localized("reporting.MOH361ACohortDefinition")
-public class Moh361ACohortDefinition extends BaseCohortDefinition {
+public class Moh361ACohortDefinition extends AMRSReportsCohortDefinition {
 
 	public static final String COHORT_UUID = "MOH361A-01Cohort0000000000000000000000";
 
