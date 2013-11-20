@@ -27,11 +27,9 @@ import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.evaluation.parameter.Mapped;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
 import org.openmrs.module.reporting.report.ReportData;
-import org.openmrs.module.reporting.report.ReportDesign;
 import org.openmrs.module.reporting.report.ReportRequest;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
-import org.openmrs.module.reporting.report.renderer.ExcelTemplateRenderer;
 import org.openmrs.module.reporting.report.renderer.RenderingMode;
 import org.openmrs.module.reporting.report.service.ReportService;
 import org.openmrs.util.OpenmrsUtil;
@@ -348,11 +346,8 @@ public class QueuedReportServiceImpl implements QueuedReportService {
 		mp.addParameterMapping("facility", f);
 		r.setReportDefinition(mp);
 
-		RenderingMode rm = new RenderingMode();
-		rm.setLabel("Excel");
+		RenderingMode rm = new RenderingMode(new AMRSReportsExcelRenderer(), "Excel", "", 1);
 		rm.setArgument(MOH361AReportProvider_0_1.NAME);
-		rm.setSortWeight(1);
-		rm.setRenderer(new AMRSReportsExcelRenderer());
 		r.setRenderingMode(rm);
 
 		r.setDescription("MOH 361A 0.1 (description)");

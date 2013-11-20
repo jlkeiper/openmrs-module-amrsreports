@@ -18,14 +18,18 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.reporting.report.Report;
 import org.openmrs.module.reporting.report.processor.ReportProcessor;
 import org.openmrs.module.reporting.report.service.ReportService;
+import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+@Component
 public class SaveReportProcessor implements ReportProcessor {
+
 	@Override
 	public List<String> getConfigurationPropertyNames() {
-		return null;
+		return new ArrayList<String>();
 	}
 
 	@Override

@@ -80,8 +80,11 @@ public class AmrsReportModuleActivator implements ModuleActivator {
 		// register and update report providers
 		for (ReportProvider p : AmrsReportsConstants.REPORT_PROVIDERS) {
 			ReportProviderRegistrar.getInstance().registerReportProvider(p);
+
+			// update definitions for cohorts and reports
 			qrs.updateCohortDefinition(p.getCohortDefinition());
 			qrs.updateReportDefinition(p.getReportDefinition());
+
 			log.info("Registered report provider " + p.getName());
 		}
 	}

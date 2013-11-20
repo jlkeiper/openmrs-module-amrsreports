@@ -29,6 +29,7 @@ import org.openmrs.util.OpenmrsClassLoader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.UUID;
 
 import static org.openmrs.module.reporting.report.ReportProcessorConfiguration.ProcessorMode;
 
@@ -40,7 +41,7 @@ public class AMRSReportsExcelRenderer extends ExcelTemplateRenderer {
 
 		ReportDesign design = new ReportDesign();
 		design.setName(rp.getName() + " Design");
-		design.setRendererType(ExcelTemplateRenderer.class);
+		design.setRendererType(AMRSReportsExcelRenderer.class);
 
 		// add repeating sections property
 		Properties props = new Properties();
@@ -65,22 +66,28 @@ public class AMRSReportsExcelRenderer extends ExcelTemplateRenderer {
 		design.addResource(resource);
 
 		// add the logging processor
-		design.addReportProcessor(new ReportProcessorConfiguration(
+		ReportProcessorConfiguration logger = new ReportProcessorConfiguration(
 				"Log AMRS Reports",
 				LoggingReportProcessor.class,
 				new Properties(),
 				true,
 				false
-		));
+		);
+		logger.setProcessorMode(ProcessorMode.AUTOMATIC);
+		logger.setUuid(UUID.randomUUID().toString());
+		design.addReportProcessor(logger);
 
 		// add the saving processor
-		design.addReportProcessor(new ReportProcessorConfiguration(
+		ReportProcessorConfiguration saver = new ReportProcessorConfiguration(
 				"Save AMRS Reports",
 				SaveReportProcessor.class,
 				new Properties(),
 				true,
 				false
-		));
+		);
+		saver.setProcessorMode(ProcessorMode.AUTOMATIC);
+		saver.setUuid(UUID.randomUUID().toString());
+		design.addReportProcessor(saver);
 
 		// TODO is this where we put rendering to CSV, etc?  DiskReportProcessor?
 
