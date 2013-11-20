@@ -40,10 +40,8 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -196,47 +194,11 @@ public class DWRAmrsReportService {
 	/**
 	 * helper method for determining cohort size per location and report date
 	 */
-	public Integer getCohortCountForFacility(Integer facilityId, Date evaluationDate) throws Exception {
-		Set<Integer> cohort = this.getCohort(facilityId, evaluationDate);
-		return cohort.size();
-	}
-
-	/**
-	 * provide the list of patients in the MOH361A cohort for a given location and evaluation date
-	 */
-	public Set<Integer> getCohort(Integer facilityId, Date evaluationDate) throws Exception {
-
-		EvaluationContext context = new EvaluationContext();
-		context.setEvaluationDate(evaluationDate);
-
-		MOHFacility mohFacility = Context.getService(MOHFacilityService.class).getFacility(facilityId);
-
-		if (mohFacility == null)
-			return new HashSet<Integer>();
-
-		AMRSReportsCohortDefinition definition = new AMRSReportsCohortDefinition();
-		definition.setFacility(mohFacility);
-
-		try {
-			Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(definition, context);
-			if (cohort != null)
-				return cohort.getMemberIds();
-		} catch (EvaluationException e) {
-			log.error(e);
-		}
-
-		log.warn("No cohort found for facility #" + facilityId);
-		return new HashSet<Integer>();
-	}
-
-	/**
-	 * helper method for determining cohort size per location and report date
-	 */
 	public Map<String, Integer> getCohortCountForFacilityPerProvider(Integer facilityId,
 																	 Date evaluationDate) throws Exception {
 		Map<String, Integer> cohort = this.getCohortByProviders(facilityId, evaluationDate);
 
-        // sort the map to match criteria for fetching all report providers
+		// sort the map to match criteria for fetching all report providers
 		Map<String, Integer> treeMap = new TreeMap<String, Integer>(cohort);
 		return treeMap;
 	}
@@ -260,7 +222,7 @@ public class DWRAmrsReportService {
 		List<ReportProvider> allReportProviders = ReportProviderRegistrar.getInstance().getAllReportProviders();
 		for (ReportProvider reportProvider : allReportProviders) {
 
-			AMRSReportsCohortDefinition thisDef = (AMRSReportsCohortDefinition) reportProvider.getCohortDefinition();
+			AMRSReportsCohortDefinition thisDef = reportProvider.getCohortDefinition();
 			thisDef.setFacility(mohFacility);
 
 			try {

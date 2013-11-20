@@ -4,6 +4,7 @@ import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.amrsreports.MOHFacility;
+import org.openmrs.module.amrsreports.reporting.cohort.definition.AMRSReportsCohortDefinition;
 import org.openmrs.module.amrsreports.reporting.cohort.definition.Moh361ACohortDefinition;
 import org.openmrs.module.amrsreports.reporting.converter.ARVPatientSnapshotDateConverter;
 import org.openmrs.module.amrsreports.reporting.converter.ARVPatientSnapshotReasonConverter;
@@ -31,7 +32,6 @@ import org.openmrs.module.amrsreports.reporting.data.TransferStatusDataDefinitio
 import org.openmrs.module.amrsreports.rule.MohEvaluableNameConstants;
 import org.openmrs.module.amrsreports.service.MohCoreService;
 import org.openmrs.module.amrsreports.util.MOHReportUtil;
-import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.common.SortCriteria;
 import org.openmrs.module.reporting.data.MappedData;
 import org.openmrs.module.reporting.data.converter.BirthdateConverter;
@@ -211,7 +211,7 @@ public class MOH361AReportProvider_0_2 extends ReportProvider {
 	}
 
 	@Override
-	public CohortDefinition getCohortDefinition() {
+	public AMRSReportsCohortDefinition getCohortDefinition() {
 		return new Moh361ACohortDefinition();
 	}
 

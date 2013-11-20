@@ -2,11 +2,11 @@ package org.openmrs.module.amrsreports.reporting.provider;
 
 import org.openmrs.api.context.Context;
 import org.openmrs.module.amrsreports.MOHFacility;
+import org.openmrs.module.amrsreports.reporting.cohort.definition.AMRSReportsCohortDefinition;
 import org.openmrs.module.amrsreports.reporting.cohort.definition.Moh361ACohortDefinition;
 import org.openmrs.module.amrsreports.reporting.common.EncounterRepresentation;
 import org.openmrs.module.amrsreports.reporting.data.LastHIVEncounterDataDefinition;
 import org.openmrs.module.amrsreports.service.MohCoreService;
-import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.common.SortCriteria;
 import org.openmrs.module.reporting.data.converter.ObjectFormatter;
 import org.openmrs.module.reporting.data.converter.PropertyConverter;
@@ -157,7 +157,7 @@ public class JerTestReportProvider extends ReportProvider {
 	}
 
 	@Override
-	public CohortDefinition getCohortDefinition() {
+	public AMRSReportsCohortDefinition getCohortDefinition() {
 		return new Moh361ACohortDefinition();
 	}
 

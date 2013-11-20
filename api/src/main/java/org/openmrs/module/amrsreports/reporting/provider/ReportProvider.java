@@ -1,6 +1,6 @@
 package org.openmrs.module.amrsreports.reporting.provider;
 
-import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
+import org.openmrs.module.amrsreports.reporting.cohort.definition.AMRSReportsCohortDefinition;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
 
 /**
@@ -29,7 +29,7 @@ public abstract class ReportProvider {
 
 	public abstract ReportDefinition getReportDefinition();
 
-	public abstract CohortDefinition getCohortDefinition();
+	public abstract AMRSReportsCohortDefinition getCohortDefinition();
 
 	public abstract String getRepeatingSections();
 
