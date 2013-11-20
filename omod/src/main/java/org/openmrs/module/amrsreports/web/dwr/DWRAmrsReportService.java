@@ -19,9 +19,11 @@ import org.openmrs.module.amrsreports.task.AMRSReportsTask;
 import org.openmrs.module.amrsreports.task.RunQueuedReportsTask;
 import org.openmrs.module.amrsreports.task.UpdateHIVCareEnrollmentTask;
 import org.openmrs.module.amrsreports.util.TaskRunnerThread;
+import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
+import org.openmrs.module.reporting.evaluation.parameter.Mapped;
 import org.openmrs.scheduler.TaskDefinition;
 import org.openmrs.util.OpenmrsUtil;
 import org.openmrs.util.PrivilegeConstants;
@@ -216,17 +218,22 @@ public class DWRAmrsReportService {
 		if (mohFacility == null)
 			return new HashMap<String, Integer>();
 
+		Map<String, Object> mappings = new HashMap<String, Object>();
+		mappings.put("facility", mohFacility);
+
 		Map<String, Integer> cohortResult = new HashMap<String, Integer>();
 
 		// get report providers
 		List<ReportProvider> allReportProviders = ReportProviderRegistrar.getInstance().getAllReportProviders();
 		for (ReportProvider reportProvider : allReportProviders) {
 
-			AMRSReportsCohortDefinition thisDef = reportProvider.getCohortDefinition();
-			thisDef.setFacility(mohFacility);
+
+			Mapped<CohortDefinition> mc = new Mapped<CohortDefinition>();
+			mc.setParameterizable(reportProvider.getCohortDefinition());
+			mc.setParameterMappings(mappings);
 
 			try {
-				Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(thisDef, context);
+				Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(mc, context);
 				if (cohort != null) {
 					cohortResult.put(reportProvider.getName(), cohort.getMemberIds().size());
 				} else {
