@@ -5,15 +5,14 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
-import org.openmrs.module.amrsreports.rule.MohEvaluableNameConstants;
 import org.openmrs.module.amrsreports.MohTestUtils;
+import org.openmrs.module.amrsreports.rule.MohEvaluableNameConstants;
 
 /**
  * Test class for PatientSnapshot
  */
 public class ARVPatientSnapshotTest {
 
-//	private static final ConceptService conceptService = Context.getConceptService();
 	private static final ConceptService conceptService = null;
 
 	/**
@@ -24,19 +23,19 @@ public class ARVPatientSnapshotTest {
 	@Ignore
 	public void consume_shouldRecognizeAndSetWHOStageFromAnObsOrSpecifyPedsWHO() throws Exception {
 		// create mock data for reference in this test
-        MohTestUtils.createQuestion(MohEvaluableNameConstants.WHO_STAGE_ADULT, new String[]{
+		MohTestUtils.createQuestion(MohEvaluableNameConstants.WHO_STAGE_ADULT, new String[]{
 				MohEvaluableNameConstants.WHO_STAGE_1_ADULT,
 				MohEvaluableNameConstants.WHO_STAGE_2_ADULT,
 				MohEvaluableNameConstants.WHO_STAGE_3_ADULT,
 				MohEvaluableNameConstants.WHO_STAGE_4_ADULT
 		});
-        MohTestUtils.createQuestion(MohEvaluableNameConstants.WHO_STAGE_PEDS, new String[]{
+		MohTestUtils.createQuestion(MohEvaluableNameConstants.WHO_STAGE_PEDS, new String[]{
 				MohEvaluableNameConstants.WHO_STAGE_1_PEDS,
 				MohEvaluableNameConstants.WHO_STAGE_2_PEDS,
 				MohEvaluableNameConstants.WHO_STAGE_3_PEDS,
 				MohEvaluableNameConstants.WHO_STAGE_4_PEDS
 		});
-        MohTestUtils.createQuestion(MohEvaluableNameConstants.HIV_DNA_PCR, new String[]{
+		MohTestUtils.createQuestion(MohEvaluableNameConstants.HIV_DNA_PCR, new String[]{
 				MohEvaluableNameConstants.POSITIVE
 		});
 

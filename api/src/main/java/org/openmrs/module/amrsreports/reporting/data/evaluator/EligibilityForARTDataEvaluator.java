@@ -77,13 +77,11 @@ public class EligibilityForARTDataEvaluator extends BatchedExecutionDataEvaluato
 		ARVPatientSnapshot snapshot = new ARVPatientSnapshot();
 		snapshot.setEvaluationDate(context.getEvaluationDate());
 
-
         Boolean pTranferStatus = (Boolean)transferStatus.get(pId);
 
-        if(pTranferStatus){
+        if(pTranferStatus) {
             snapshot.set("ti","TI");
             return snapshot;
-
         }
 
 		Iterator<ObsRepresentation> i = data.iterator();
