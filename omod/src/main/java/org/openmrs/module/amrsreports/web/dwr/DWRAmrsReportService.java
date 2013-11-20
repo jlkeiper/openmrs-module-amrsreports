@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Cohort;
+import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.AdministrationService;
@@ -11,7 +12,6 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.amrsreports.HIVCareEnrollment;
 import org.openmrs.module.amrsreports.MOHFacility;
 import org.openmrs.module.amrsreports.reporting.cohort.definition.Moh361ACohortDefinition;
-import org.openmrs.module.amrsreports.reporting.provider.ReportProvider;
 import org.openmrs.module.amrsreports.service.HIVCareEnrollmentService;
 import org.openmrs.module.amrsreports.service.MOHFacilityService;
 import org.openmrs.module.amrsreports.service.ReportProviderRegistrar;
@@ -19,14 +19,13 @@ import org.openmrs.module.amrsreports.task.AMRSReportsTask;
 import org.openmrs.module.amrsreports.task.RunQueuedReportsTask;
 import org.openmrs.module.amrsreports.task.UpdateHIVCareEnrollmentTask;
 import org.openmrs.module.amrsreports.util.TaskRunnerThread;
-import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.cohort.definition.service.CohortDefinitionService;
 import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
-import org.openmrs.module.reporting.evaluation.parameter.Mapped;
 import org.openmrs.scheduler.TaskDefinition;
 import org.openmrs.util.OpenmrsUtil;
 import org.openmrs.util.PrivilegeConstants;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.http.HttpServletResponse;
@@ -205,22 +204,19 @@ public class DWRAmrsReportService {
 	 */
 	public Set<Integer> getCohort(Integer facilityId, Date evaluationDate) throws Exception {
 
-		MOHFacility f = Context.getService(MOHFacilityService.class).getFacility(facilityId);
-
-		if (f == null)
-			return new HashSet<Integer>();
-
-		ReportProvider p = ReportProviderRegistrar.getInstance().getAllReportProviders().get(0);
-
-		Mapped<CohortDefinition> mc = new Mapped<CohortDefinition>();
-		mc.setParameterizable(p.getCohortDefinition());
-		mc.addParameterMapping("facility", f);
-
 		EvaluationContext context = new EvaluationContext();
 		context.setEvaluationDate(evaluationDate);
 
+		MOHFacility mohFacility = Context.getService(MOHFacilityService.class).getFacility(facilityId);
+
+		if (mohFacility == null)
+			return new HashSet<Integer>();
+
+		Moh361ACohortDefinition definition = new Moh361ACohortDefinition();
+		definition.setFacility(mohFacility);
+
 		try {
-			Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(mc, context);
+			Cohort cohort = Context.getService(CohortDefinitionService.class).evaluate(definition, context);
 			if (cohort != null)
 				return cohort.getMemberIds();
 		} catch (EvaluationException e) {
@@ -386,16 +382,15 @@ public class DWRAmrsReportService {
 	public Boolean isReportRunnerScheduledTaskOn() {
 		Context.addProxyPrivilege(PrivilegeConstants.MANAGE_SCHEDULER);
 
-		for (TaskDefinition definition : Context.getSchedulerService().getScheduledTasks()) {
+		for (TaskDefinition definition: Context.getSchedulerService().getScheduledTasks()) {
 			if (OpenmrsUtil.nullSafeEquals(RunQueuedReportsTask.class.getCanonicalName(), definition.getTaskClass())
-					&& definition.getStarted()) {
-				Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_SCHEDULER);
-				return true;
+				&& definition.getStarted()) {
+					Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_SCHEDULER);
+					return true;
 			}
 		}
 
 		Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_SCHEDULER);
 		return false;
 	}
-
 }
