@@ -2,6 +2,7 @@ package org.openmrs.module.amrsreports.service;
 
 import org.openmrs.module.amrsreports.MOHFacility;
 import org.openmrs.module.amrsreports.QueuedReport;
+import org.openmrs.module.amrsreports.reporting.provider.ReportProvider;
 import org.openmrs.module.reporting.cohort.definition.CohortDefinition;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
@@ -40,8 +41,11 @@ public interface QueuedReportService {
 	public List<QueuedReport> getQueuedReportsByFacilities(List<MOHFacility> facilities, String status);
 
 	@Transactional
-	public void updateCohortDefinition(CohortDefinition cd);
+	public void updateCohortDefinition(ReportProvider p);
 
 	@Transactional
-	public void updateReportDefinition(ReportDefinition rd);
+	public void updateReportDefinition(ReportProvider p);
+
+	@Transactional
+	public void updateReportDesign(ReportProvider p);
 }
