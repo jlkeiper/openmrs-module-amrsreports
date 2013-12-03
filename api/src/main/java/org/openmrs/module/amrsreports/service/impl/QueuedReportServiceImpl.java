@@ -26,7 +26,9 @@ import org.openmrs.module.reporting.evaluation.EvaluationContext;
 import org.openmrs.module.reporting.evaluation.EvaluationException;
 import org.openmrs.module.reporting.evaluation.parameter.Mapped;
 import org.openmrs.module.reporting.evaluation.parameter.Parameter;
+import org.openmrs.module.reporting.report.Report;
 import org.openmrs.module.reporting.report.ReportData;
+import org.openmrs.module.reporting.report.ReportDesign;
 import org.openmrs.module.reporting.report.ReportRequest;
 import org.openmrs.module.reporting.report.definition.ReportDefinition;
 import org.openmrs.module.reporting.report.definition.service.ReportDefinitionService;
@@ -74,15 +76,30 @@ public class QueuedReportServiceImpl implements QueuedReportService {
 		if (queuedReport.getFacility() == null)
 			throw new APIException("The queued report must reference a facility.");
 
+		// generate filename prefix for queued report artifacts
+		queuedReport.setFilenamePrefix(generateFilenamePrefix(queuedReport));
+
 		// build a report request
 		ReportRequest rr = buildReportRequest(queuedReport);
 
-		// submit it
-		rr = Context.getService(ReportService.class).queueReport(rr);
+		// save the request
+		rr = Context.getService(ReportService.class).saveReportRequest(rr);
 
 		// mark original QueuedReport as submitted and save status
-		queuedReport.setStatus(QueuedReport.STATUS_SUBMITTED);
+		queuedReport.setStatus(QueuedReport.STATUS_RUNNING);
 		queuedReport.setReportRequestUUID(rr.getUuid());
+		Context.getService(QueuedReportService.class).saveQueuedReport(queuedReport);
+
+		// run the report
+		Report r = Context.getService(ReportService.class).runReport(rr);
+
+		// deal with errors
+		if (OpenmrsUtil.nullSafeEquals(r.getRequest().getStatus(), ReportRequest.Status.FAILED)) {
+			throw new APIException("Could not process report request.");
+		}
+
+		// update queued report
+		queuedReport.setStatus(QueuedReport.STATUS_COMPLETE);
 		Context.getService(QueuedReportService.class).saveQueuedReport(queuedReport);
 
 		// update schedule if needed
@@ -112,147 +129,29 @@ public class QueuedReportServiceImpl implements QueuedReportService {
 		applicationContext.publishEvent(new ReportCompletedEvent(rr));
 	}
 
-	public void oldWay(QueuedReport queuedReport) throws EvaluationException, IOException {
-		// validate
-		if (queuedReport.getReportName() == null)
-			throw new APIException("The queued report must reference a report provider by name.");
-
-		if (queuedReport.getFacility() == null)
-			throw new APIException("The queued report must reference a facility.");
-
-		// find the report provider
-		ReportProvider reportProvider = ReportProviderRegistrar.getInstance().getReportProviderByName(queuedReport.getReportName());
-
-		CohortDefinition cohortDefinition = reportProvider.getCohortDefinition();
-		cohortDefinition.addParameter(new Parameter("facility", "Facility", MOHFacility.class));
-
-		ReportDefinition reportDefinition = reportProvider.getReportDefinition();
-		reportDefinition.addParameter(new Parameter("facility", "Facility", MOHFacility.class));
-
-		// try rendering the report
-		EvaluationContext evaluationContext = new EvaluationContext();
-
-		// set up evaluation context values
-		evaluationContext.addParameterValue("facility", queuedReport.getFacility());
-		evaluationContext.setEvaluationDate(queuedReport.getEvaluationDate());
-
-		StopWatch timer = new StopWatch();
-		timer.start();
-
-		// get the cohort
-		CohortDefinitionService cohortDefinitionService = Context.getService(CohortDefinitionService.class);
-		Cohort cohort = cohortDefinitionService.evaluate(cohortDefinition, evaluationContext);
-		evaluationContext.setBaseCohort(cohort);
-
-		timer.stop();
-		String cohortTime = timer.toString();
-		timer.reset();
-
-		// find the persisted temporary cohort
-		Cohort savedCohort = Context.getCohortService().getCohortByUuid(AmrsReportsConstants.SAVED_COHORT_UUID);
-
-		// initialize it if the temporary cohort does not yet exist
-		if (savedCohort == null) {
-			savedCohort = new Cohort();
-			savedCohort.setName("AMRS Reports");
-			savedCohort.setDescription("Temporary cohort for AMRS Reports Module; refreshed for each report.");
-			savedCohort.setUuid(AmrsReportsConstants.SAVED_COHORT_UUID);
-		}
-
-		// update and save the cohort
-		savedCohort.setMemberIds(cohort.getMemberIds());
-		Context.getCohortService().saveCohort(savedCohort);
-
-		timer.start();
-
-		// get the time the report was started (not finished)
-		Date startTime = Calendar.getInstance().getTime();
-		String formattedStartTime = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(startTime);
-		String formattedEvaluationDate = new SimpleDateFormat("yyyy-MM-dd").format(queuedReport.getEvaluationDate());
-		ReportData reportData = Context.getService(ReportDefinitionService.class)
-				.evaluate(reportDefinition, evaluationContext);
-
-		timer.stop();
-
-		log.info("Time for rendering " + cohort.getSize() + "-person cohort: " + cohortTime);
-		log.info("Time for rendering " + cohort.getSize() + "-person report: " + timer.toString());
-
+	private String generateFilenamePrefix(QueuedReport queuedReport) {
 		// find the directory to put the file in
 		AdministrationService as = Context.getAdministrationService();
 		String folderName = as.getGlobalProperty("amrsreports.file_dir");
 
-		// create a new file
-		String code = queuedReport.getFacility().getCode();
+		// format dates and times for use in filename
+		String formattedStartTime = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
+				.format(new Date());
+		String formattedEvaluationDate = new SimpleDateFormat("yyyy-MM-dd")
+				.format(queuedReport.getEvaluationDate());
 
-		String csvFilename = ""
+		// generate the name
+		return folderName
+				+ File.separator
 				+ queuedReport.getReportName().replaceAll(" ", "-")
 				+ "_"
-				+ code
+				+ queuedReport.getFacility().getCode()
 				+ "_"
 				+ queuedReport.getFacility().getName().replaceAll(" ", "-")
 				+ "_as-of_"
 				+ formattedEvaluationDate
 				+ "_run-on_"
-				+ formattedStartTime
-				+ ".csv";
-
-		File loaddir = OpenmrsUtil.getDirectoryInApplicationDataDirectory(folderName);
-		File amrsreport = new File(loaddir, csvFilename);
-		BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(amrsreport));
-
-		// renderCSVFromReportData the CSV
-		MOHReportUtil.renderCSVFromReportData(reportData, outputStream);
-		outputStream.close();
-
-		String xlsFilename = FilenameUtils.getBaseName(csvFilename) + ".xls";
-		File xlsFile = new File(loaddir, xlsFilename);
-		OutputStream stream = new BufferedOutputStream(new FileOutputStream(xlsFile));
-
-//		// get the report design
-//		final ReportDesign design = reportProvider.getReportDesign();
-//
-//		// build an Excel template renderer with the report design
-//		ExcelTemplateRenderer renderer = new ExcelTemplateRenderer() {
-//			public ReportDesign getDesign(String argument) {
-//				return design;
-//			}
-//		};
-//
-//		// render the Excel template
-//		renderer.render(reportData, queuedReport.getReportName(), stream);
-//		stream.close();
-
-		// finish off by setting stuff on the queued report
-//		queuedReport.setCsvFilename(csvFilename);
-//		queuedReport.setXlsFilename(xlsFilename);
-
-		//Mark original QueuedReport as complete and save status
-		queuedReport.setStatus(QueuedReport.STATUS_COMPLETE);
-		Context.getService(QueuedReportService.class).saveQueuedReport(queuedReport);
-
-		if (queuedReport.getRepeatInterval() != null && queuedReport.getRepeatInterval() > 0) {
-
-			//create a new QueuedReport borrowing some values from the run report
-			QueuedReport newQueuedReport = new QueuedReport();
-			newQueuedReport.setFacility(queuedReport.getFacility());
-			newQueuedReport.setReportName(queuedReport.getReportName());
-
-
-			//compute date for next schedule
-			Calendar newScheduleDate = Calendar.getInstance();
-			newScheduleDate.setTime(queuedReport.getDateScheduled());
-			newScheduleDate.add(Calendar.SECOND, newScheduleDate.get(Calendar.SECOND) + queuedReport.getRepeatInterval());
-			Date nextSchedule = newScheduleDate.getTime();
-
-			//set date for next schedule
-			newQueuedReport.setDateScheduled(nextSchedule);
-			newQueuedReport.setEvaluationDate(nextSchedule);
-
-			newQueuedReport.setStatus(QueuedReport.STATUS_NEW);
-			newQueuedReport.setRepeatInterval(queuedReport.getRepeatInterval());
-
-			Context.getService(QueuedReportService.class).saveQueuedReport(newQueuedReport);
-		}
+				+ formattedStartTime;
 	}
 
 	@Override
@@ -296,7 +195,8 @@ public class QueuedReportServiceImpl implements QueuedReportService {
 	}
 
 	@Override
-	public void updateCohortDefinition(CohortDefinition cd) {
+	public void updateCohortDefinition(ReportProvider p) {
+		CohortDefinition cd = p.getCohortDefinition();
 		CohortDefinition existing = Context.getService(CohortDefinitionService.class).getDefinitionByUuid(cd.getUuid());
 		if (existing != null) {
 			Context.getService(CohortDefinitionService.class).purgeDefinition(existing);
@@ -306,13 +206,25 @@ public class QueuedReportServiceImpl implements QueuedReportService {
 	}
 
 	@Override
-	public void updateReportDefinition(ReportDefinition rd) {
+	public void updateReportDefinition(ReportProvider p) {
+		ReportDefinition rd = p.getReportDefinition();
 		ReportDefinition existing = Context.getService(ReportDefinitionService.class).getDefinitionByUuid(rd.getUuid());
 		if (existing != null) {
 			Context.getService(ReportDefinitionService.class).purgeDefinition(existing);
 			Context.flushSession();
 		}
 		Context.getService(ReportDefinitionService.class).saveDefinition(rd);
+	}
+
+	@Override
+	public void updateReportDesign(ReportProvider p) {
+		ReportDesign rd = p.getReportDesign();
+		ReportDesign existing = Context.getService(ReportService.class).getReportDesignByUuid(rd.getUuid());
+		if (existing != null) {
+			Context.getService(ReportService.class).purgeReportDesign(existing);
+			Context.flushSession();
+		}
+		Context.getService(ReportService.class).saveReportDesign(rd);
 	}
 
 	private ReportRequest buildReportRequest(QueuedReport queuedReport) throws EvaluationException {
@@ -346,12 +258,12 @@ public class QueuedReportServiceImpl implements QueuedReportService {
 		mp.addParameterMapping("facility", f);
 		r.setReportDefinition(mp);
 
-		RenderingMode rm = new RenderingMode(new AMRSReportsExcelRenderer(), "Excel", "", 1);
-		rm.setArgument(MOH361AReportProvider_0_1.NAME);
+		RenderingMode rm = new RenderingMode(new AMRSReportsExcelRenderer(), "Excel", null, 1);
+		rm.setArgument(p.getReportDesign().getUuid());
 		r.setRenderingMode(rm);
 
-		r.setDescription("MOH 361A 0.1 (description)");
 		r.setEvaluationDate(queuedReport.getEvaluationDate());
+		r.setPriority(ReportRequest.Priority.NORMAL);
 		r.setProcessAutomatically(true);
 
 		return r;
