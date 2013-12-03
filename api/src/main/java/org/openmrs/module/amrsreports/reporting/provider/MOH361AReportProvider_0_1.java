@@ -62,6 +62,7 @@ public class MOH361AReportProvider_0_1 extends ReportProvider {
 
 	public static final String NAME = "MOH 361A 0.1";
 	public static final String REPORT_UUID = "MOH361A-01Report0000000000000000000000";
+	public static final String REPORT_DESIGN_UUID = "MOH361A-01ReportDesign0000000000000000";
 
 	public MOH361AReportProvider_0_1() {
 		this.name = "MOH 361A 0.1";
@@ -223,5 +224,10 @@ public class MOH361AReportProvider_0_1 extends ReportProvider {
 	@Override
 	public String getTemplateFilename() {
 		return "MOH361AReportTemplate_0_1.xls";
+	}
+
+	@Override
+	protected String getReportDesignUUID() {
+		return REPORT_DESIGN_UUID;
 	}
 }

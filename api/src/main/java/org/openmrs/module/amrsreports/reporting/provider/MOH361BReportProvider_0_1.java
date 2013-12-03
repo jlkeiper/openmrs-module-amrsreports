@@ -40,6 +40,7 @@ public class MOH361BReportProvider_0_1 extends ReportProvider {
 	private static final String MONTH_AND_YEAR_FORMAT = "MM/yyyy";
 	public static final String NAME = "MOH 361B 0.1-SNAPSHOT";
 	public static final String REPORT_UUID = "MOH361B-01Report0000000000000000000000";
+	public static final String REPORT_DESIGN_UUID = "MOH361B-01ReportDesign0000000000000000";
 
 	public MOH361BReportProvider_0_1() {
 		this.name = "MOH 361B 0.1-SNAPSHOT";
@@ -183,5 +184,10 @@ public class MOH361BReportProvider_0_1 extends ReportProvider {
 	@Override
 	public String getTemplateFilename() {
 		return "MOH361BReportTemplate_0_1.xls";
+	}
+
+	@Override
+	protected String getReportDesignUUID() {
+		return REPORT_DESIGN_UUID;
 	}
 }

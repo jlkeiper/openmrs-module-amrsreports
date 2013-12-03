@@ -24,6 +24,8 @@ import java.util.Map;
  */
 public class JerTestReportProvider extends ReportProvider {
 
+	public static final String REPORT_DESIGN_UUID = "JersTestReportDesign000000000000000000";
+
 	public JerTestReportProvider() {
 		this.name = "Jer's Test";
 		this.visible = true;
@@ -169,5 +171,10 @@ public class JerTestReportProvider extends ReportProvider {
 	@Override
 	public String getTemplateFilename() {
 		return "MOH361AReportTemplate_0_1.xls";
+	}
+
+	@Override
+	protected String getReportDesignUUID() {
+		return REPORT_DESIGN_UUID;
 	}
 }
