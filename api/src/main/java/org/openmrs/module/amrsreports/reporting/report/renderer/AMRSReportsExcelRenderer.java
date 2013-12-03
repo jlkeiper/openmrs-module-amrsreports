@@ -14,84 +14,8 @@
 
 package org.openmrs.module.amrsreports.reporting.report.renderer;
 
-import org.apache.commons.io.IOUtils;
-import org.openmrs.api.APIException;
-import org.openmrs.module.amrsreports.reporting.provider.ReportProvider;
-import org.openmrs.module.amrsreports.reporting.report.processor.SaveReportProcessor;
-import org.openmrs.module.amrsreports.service.ReportProviderRegistrar;
-import org.openmrs.module.reporting.report.ReportDesign;
-import org.openmrs.module.reporting.report.ReportDesignResource;
-import org.openmrs.module.reporting.report.ReportProcessorConfiguration;
-import org.openmrs.module.reporting.report.processor.LoggingReportProcessor;
 import org.openmrs.module.reporting.report.renderer.ExcelTemplateRenderer;
-import org.openmrs.util.OpenmrsClassLoader;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-import java.util.UUID;
-
-import static org.openmrs.module.reporting.report.ReportProcessorConfiguration.ProcessorMode;
 
 public class AMRSReportsExcelRenderer extends ExcelTemplateRenderer {
-
-	public ReportDesign getDesign(String argument) {
-
-		ReportProvider rp = ReportProviderRegistrar.getInstance().getReportProviderByName(argument);
-
-		ReportDesign design = new ReportDesign();
-		design.setName(rp.getName() + " Design");
-		design.setRendererType(AMRSReportsExcelRenderer.class);
-
-		// add repeating sections property
-		Properties props = new Properties();
-		props.put("repeatingSections", rp.getRepeatingSections());
-		design.setProperties(props);
-
-		// add the excel template
-		ReportDesignResource resource = new ReportDesignResource();
-		resource.setName("template.xls");
-		InputStream is = OpenmrsClassLoader.getInstance().getResourceAsStream("templates/" + rp.getTemplateFilename());
-
-		if (is == null)
-			throw new APIException("Could not find report template.");
-
-		try {
-			resource.setContents(IOUtils.toByteArray(is));
-		} catch (IOException ex) {
-			throw new APIException("Could not create report design for MOH 361A Register.", ex);
-		}
-
-		IOUtils.closeQuietly(is);
-		design.addResource(resource);
-
-		// add the logging processor
-		ReportProcessorConfiguration logger = new ReportProcessorConfiguration(
-				"Log AMRS Reports",
-				LoggingReportProcessor.class,
-				new Properties(),
-				true,
-				false
-		);
-		logger.setProcessorMode(ProcessorMode.AUTOMATIC);
-		logger.setUuid(UUID.randomUUID().toString());
-		design.addReportProcessor(logger);
-
-		// add the saving processor
-		ReportProcessorConfiguration saver = new ReportProcessorConfiguration(
-				"Save AMRS Reports",
-				SaveReportProcessor.class,
-				new Properties(),
-				true,
-				false
-		);
-		saver.setProcessorMode(ProcessorMode.AUTOMATIC);
-		saver.setUuid(UUID.randomUUID().toString());
-		design.addReportProcessor(saver);
-
-		// TODO is this where we put rendering to CSV, etc?  DiskReportProcessor?
-
-		return design;
-	}
 
 }
