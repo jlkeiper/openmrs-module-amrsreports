@@ -514,4 +514,168 @@
                                  referencedColumnNames="patient_id"/>
     </changeSet>
 
+    <changeSet id="amrsreports-2013-12-23-a" author="jkeiper">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="amrsreports_art_regimen_drug"/>
+            </not>
+        </preConditions>
+        <comment>
+            Creating the amrsreports_art_regimen_drug table
+        </comment>
+        <createTable tableName="amrsreports_art_regimen_drug">
+            <column name="art_regimen_drug_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)" defaultValue="null"/>
+            <column name="creator" type="int(11)" >
+                <constraints nullable="false" />
+            </column>
+            <column name="date_created" type="datetime" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int(11)" />
+            <column name="date_changed" type="datetime" />
+            <column name="retired" type="tinyint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int(11)" />
+            <column name="date_retired" type="datetime" />
+            <column name="retire_reason" type="varchar(255)" defaultValue="null"/>
+
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="amrsreports_art_regimen_drug_creator"
+                                 baseTableName="amrsreports_art_regimen_drug" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"
+                />
+        <addForeignKeyConstraint constraintName="amrsreports_art_regimen_drug_changed_by"
+                                 baseTableName="amrsreports_art_regimen_drug" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"
+                />
+        <addForeignKeyConstraint constraintName="amrsreports_art_regimen_drug_retired_by"
+                                 baseTableName="amrsreports_art_regimen_drug" baseColumnNames="retired_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"
+                />
+    </changeSet>
+
+    <changeSet id="amrsreports-2013-12-23-b" author="jkeiper">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="amrsreports_art_regimen_drug_drug"/>
+            </not>
+        </preConditions>
+        <comment>
+            Creating the amrsreports_art_regimen_drug_drug table
+        </comment>
+        <createTable tableName="amrsreports_art_regimen_drug_drug">
+            <column name="art_regimen_drug_id" type="int(11)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="drug_id" type="int(11)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="amrsreports_art_regimen_drug_drug_regimen_drug"
+                                 baseTableName="amrsreports_art_regimen_drug_drug" baseColumnNames="art_regimen_drug_id"
+                                 referencedTableName="amrsreports_art_regimen_drug" referencedColumnNames="art_regimen_drug_id"
+                />
+        <addForeignKeyConstraint constraintName="amrsreports_art_regimen_drug_drug_drug"
+                                 baseTableName="amrsreports_art_regimen_drug_drug" baseColumnNames="drug_id"
+                                 referencedTableName="drug" referencedColumnNames="drug_id"
+                />
+    </changeSet>
+
+    <changeSet id="amrsreports-2013-12-23-c" author="jkeiper">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="amrsreports_art_regimen"/>
+            </not>
+        </preConditions>
+        <comment>
+            Creating the amrsreports_art_regimen table
+        </comment>
+        <createTable tableName="amrsreports_art_regimen">
+            <column name="art_regimen_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)" defaultValue="null"/>
+            <column name="line" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="age" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator" type="int(11)" >
+                <constraints nullable="false" />
+            </column>
+            <column name="date_created" type="datetime" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int(11)" />
+            <column name="date_changed" type="datetime" />
+            <column name="retired" type="tinyint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int(11)" />
+            <column name="date_retired" type="datetime" />
+            <column name="retire_reason" type="varchar(255)" defaultValue="null"/>
+
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="amrsreports_art_regimen_creator"
+                                 baseTableName="amrsreports_art_regimen" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"
+                />
+        <addForeignKeyConstraint constraintName="amrsreports_art_regimen_changed_by"
+                                 baseTableName="amrsreports_art_regimen" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"
+                />
+        <addForeignKeyConstraint constraintName="amrsreports_art_regimen_retired_by"
+                                 baseTableName="amrsreports_art_regimen" baseColumnNames="retired_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"
+                />
+    </changeSet>
+
+    <changeSet id="amrsreports-2013-12-23-d" author="jkeiper">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="amrsreports_art_regimen_art_regimen_drug"/>
+            </not>
+        </preConditions>
+        <comment>
+            Creating the amrsreports_art_regimen_art_regimen_drug table
+        </comment>
+        <createTable tableName="amrsreports_art_regimen_art_regimen_drug">
+            <column name="art_regimen_id" type="int(11)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="art_regimen_drug_id" type="int(11)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="amrsreports_art_regimen_art_regimen_drug_art_regimen_drug"
+                                 baseTableName="amrsreports_art_regimen_art_regimen_drug" baseColumnNames="art_regimen_drug_id"
+                                 referencedTableName="amrsreports_art_regimen_drug" referencedColumnNames="art_regimen_drug_id"
+                />
+        <addForeignKeyConstraint constraintName="amrsreports_art_regimen_art_regimen_drug_art_regimen"
+                                 baseTableName="amrsreports_art_regimen_art_regimen_drug" baseColumnNames="art_regimen_id"
+                                 referencedTableName="amrsreports_art_regimen" referencedColumnNames="art_regimen_id"
+                />
+    </changeSet>
+
 </databaseChangeLog>
