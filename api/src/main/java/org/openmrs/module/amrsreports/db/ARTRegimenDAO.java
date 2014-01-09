@@ -22,4 +22,9 @@ public interface ARTRegimenDAO {
 
 	public List<ARTRegimen> getAllARTRegimens();
 
+	public ARTRegimen getARTRegimen(Integer artRegimenId);
+
+	public ARTRegimen saveARTRegimen(ARTRegimen regimen);
+
+	public void purgeARTRegimen(ARTRegimen regimen);
 }

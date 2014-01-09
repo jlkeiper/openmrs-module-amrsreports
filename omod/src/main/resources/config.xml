@@ -37,7 +37,6 @@
 		UserFacility.hbm.xml
         HIVCareEnrollment.hbm.xml
         ARTRegimen.hbm.xml
-        ARTRegimenDrug.hbm.xml
 	</mappingFiles>
 	
 	<!-- Required Privileges -->

@@ -15,9 +15,10 @@
 package org.openmrs.module.amrsreports.model;
 
 import org.openmrs.BaseOpenmrsMetadata;
+import org.openmrs.Concept;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ARTRegimen extends BaseOpenmrsMetadata {
 
@@ -29,7 +30,7 @@ public class ARTRegimen extends BaseOpenmrsMetadata {
 	private Integer artRegimenId = null;
 	private String line = null;
 	private String age = null;
-	private List<ARTRegimenDrug> regimenDrugs = null;
+	private Set<Concept> drugs = null;
 
 	@Override
 	public Integer getId() {
@@ -65,14 +66,18 @@ public class ARTRegimen extends BaseOpenmrsMetadata {
 		this.age = age;
 	}
 
-	public List<ARTRegimenDrug> getRegimenDrugs() {
-		if (regimenDrugs == null) {
-			regimenDrugs = new ArrayList<ARTRegimenDrug>();
+	public Set<Concept> getDrugs() {
+		if (drugs == null) {
+			drugs = new HashSet<Concept>();
 		}
-		return regimenDrugs;
+		return drugs;
 	}
 
-	public void setRegimenDrugs(List<ARTRegimenDrug> regimenDrugs) {
-		this.regimenDrugs = regimenDrugs;
+	public void setDrugs(Set<Concept> drugs) {
+		this.drugs = drugs;
+	}
+
+	public void addDrug(Concept drug) {
+		this.getDrugs().add(drug);
 	}
 }

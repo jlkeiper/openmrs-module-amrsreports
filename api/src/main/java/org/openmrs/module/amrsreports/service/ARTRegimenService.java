@@ -29,4 +29,19 @@ public interface ARTRegimenService {
 	 */
 	@Transactional(readOnly = true)
 	public List<ARTRegimen> getAllARTRegimens();
+
+	@Transactional(readOnly = false)
+	public ARTRegimen getARTRegimen(Integer artRegimenId);
+
+	@Transactional(readOnly = false)
+	public ARTRegimen saveARTRegimen(ARTRegimen regimen);
+
+	@Transactional(readOnly = false)
+	public void retireARTRegimen(ARTRegimen regimen, String retireReason);
+
+	@Transactional(readOnly = false)
+	public void unretireARTRegimen(ARTRegimen regimen);
+
+	@Transactional(readOnly = false)
+	public void purgeARTRegimen(ARTRegimen regimen);
 }

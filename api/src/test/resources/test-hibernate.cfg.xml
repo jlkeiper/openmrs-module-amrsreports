@@ -10,6 +10,5 @@
         <mapping resource="HIVCareEnrollment.hbm.xml"/>
         <mapping resource="UserFacility.hbm.xml"/>
         <mapping resource="ARTRegimen.hbm.xml"/>
-        <mapping resource="ARTRegimenDrug.hbm.xml"/>
 	</session-factory>
 </hibernate-configuration>

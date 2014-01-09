@@ -34,7 +34,7 @@ public class ARTRegimenListController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String showFacilities() {
+	public String showARTRegimens() {
 		return "module/amrsreports/regimenList";
 	}
 

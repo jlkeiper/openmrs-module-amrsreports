@@ -14,9 +14,9 @@
         <property name="line" type="java.lang.String" not-null="true"/>
         <property name="age" type="java.lang.String" not-null="true"/>
 
-        <set name="regimenDrugs" table="amrsreports_art_regimen_art_regimen_drug" cascade="delete">
+        <set name="drugs" table="amrsreports_art_regimen_drug" cascade="delete">
             <key column="art_regimen_id"/>
-            <many-to-many column="art_regimen_drug_id" unique="true" class="org.openmrs.module.amrsreports.model.ARTRegimenDrug"/>
+            <many-to-many column="concept_id" class="org.openmrs.Concept"/>
         </set>
 
         <many-to-one name="creator" class="org.openmrs.User" not-null="true">

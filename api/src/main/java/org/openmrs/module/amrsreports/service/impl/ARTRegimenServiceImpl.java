@@ -16,11 +16,14 @@ package org.openmrs.module.amrsreports.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.api.APIException;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.amrsreports.db.ARTRegimenDAO;
 import org.openmrs.module.amrsreports.model.ARTRegimen;
 import org.openmrs.module.amrsreports.service.ARTRegimenService;
 
+import java.util.Date;
 import java.util.List;
 
 public class ARTRegimenServiceImpl extends BaseOpenmrsService implements ARTRegimenService {
@@ -39,5 +42,43 @@ public class ARTRegimenServiceImpl extends BaseOpenmrsService implements ARTRegi
 	@Override
 	public List<ARTRegimen> getAllARTRegimens() {
 		return dao.getAllARTRegimens();
+	}
+
+	@Override
+	public ARTRegimen getARTRegimen(Integer artRegimenId) {
+		return dao.getARTRegimen(artRegimenId);
+	}
+
+	@Override
+	public ARTRegimen saveARTRegimen(ARTRegimen regimen) {
+		return dao.saveARTRegimen(regimen);
+	}
+
+	@Override
+	public void retireARTRegimen(ARTRegimen regimen, String retireReason) {
+		if (retireReason == null || retireReason.length() < 1)
+			throw new APIException("A reason is required when retiring a regimen");
+
+		regimen.setRetired(true);
+		regimen.setRetiredBy(Context.getAuthenticatedUser());
+		regimen.setDateRetired(new Date());
+		regimen.setRetireReason(retireReason);
+
+		dao.saveARTRegimen(regimen);
+	}
+
+	@Override
+	public void unretireARTRegimen(ARTRegimen regimen) {
+		regimen.setRetired(false);
+		regimen.setRetiredBy(null);
+		regimen.setDateRetired(null);
+		regimen.setRetireReason(null);
+
+		dao.saveARTRegimen(regimen);
+	}
+
+	@Override
+	public void purgeARTRegimen(ARTRegimen regimen) {
+		dao.purgeARTRegimen(regimen);
 	}
 }

@@ -30,6 +30,25 @@ public class HibernateARTRegimenDAO implements ARTRegimenDAO {
 
 	@Override
 	public List<ARTRegimen> getAllARTRegimens() {
-		return sessionFactory.getCurrentSession().createCriteria(ARTRegimen.class).list();
+		return (List<ARTRegimen>) sessionFactory.getCurrentSession()
+				.createCriteria(ARTRegimen.class)
+				.list();
+	}
+
+	@Override
+	public ARTRegimen getARTRegimen(Integer artRegimenId) {
+		return (ARTRegimen) sessionFactory.getCurrentSession()
+				.get(ARTRegimen.class, artRegimenId);
+	}
+
+	@Override
+	public ARTRegimen saveARTRegimen(ARTRegimen regimen) {
+		sessionFactory.getCurrentSession().saveOrUpdate(regimen);
+		return regimen;
+	}
+
+	@Override
+	public void purgeARTRegimen(ARTRegimen regimen) {
+		sessionFactory.getCurrentSession().delete(regimen);
 	}
 }

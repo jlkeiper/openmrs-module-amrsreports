@@ -50,6 +50,13 @@
             </a>
         </li>
     </openmrs:hasPrivilege>
+    <openmrs:hasPrivilege privilege="View Drugs">
+        <li <c:if test='<%= request.getRequestURI().contains("regimenList") %>'>class="active"</c:if>>
+            <a href="${pageContext.request.contextPath}/module/amrsreports/regimen.list">
+                Manage ART Regimens
+            </a>
+        </li>
+    </openmrs:hasPrivilege>
     <openmrs:hasPrivilege privilege="View Global Properties">
         <li <c:if test='<%= request.getRequestURI().contains("settings") %>'>class="active"</c:if>>
             <a href="${pageContext.request.contextPath}/module/amrsreports/settings.form">

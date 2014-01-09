@@ -5,11 +5,11 @@
 
 <%@ include file="localHeader.jsp" %>
 
-<c:if test="${not empty facility.facilityId}">
+<c:if test="${empty facility.facilityId}">
     <h2>Add MOH Facility</h2>
 </c:if>
 
-<c:if test="${empty facility.facilityId}">
+<c:if test="${not empty facility.facilityId}">
     <h2>Edit MOH Facility</h2>
 </c:if>
 
