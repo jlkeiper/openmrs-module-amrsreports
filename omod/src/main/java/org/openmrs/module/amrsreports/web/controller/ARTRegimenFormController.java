@@ -88,7 +88,7 @@ public class ARTRegimenFormController {
 				return EDIT_VIEW;
 			}
 
-			// TODO understand why this is necessary -- name, desc, etc are empty when it comes this way
+			// get the object by id, since that is the only value coming from the form
 			regimen = Context.getService(ARTRegimenService.class).getARTRegimen(regimen.getArtRegimenId());
 
 			service.retireARTRegimen(regimen, retireReason);
@@ -99,9 +99,8 @@ public class ARTRegimenFormController {
 
 		// if the user is un-retiring out the EncounterType
 		else if (request.getParameter("unretire") != null) {
-			String retireReason = request.getParameter("retireReason");
 
-			// TODO understand why this is necessary -- name, desc, etc are empty when it comes this way
+			// get the object by id, since that is the only value coming from the form
 			regimen = Context.getService(ARTRegimenService.class).getARTRegimen(regimen.getArtRegimenId());
 
 			service.unretireARTRegimen(regimen);
@@ -114,7 +113,7 @@ public class ARTRegimenFormController {
 		else if (request.getParameter("purge") != null) {
 
 			try {
-				// TODO understand why this is necessary -- name, desc, etc are empty when it comes this way
+				// get the object by id, since that is the only value coming from the form
 				regimen = Context.getService(ARTRegimenService.class).getARTRegimen(regimen.getArtRegimenId());
 
 				service.purgeARTRegimen(regimen);

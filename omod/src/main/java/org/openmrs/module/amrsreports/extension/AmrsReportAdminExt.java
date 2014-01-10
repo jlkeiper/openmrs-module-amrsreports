@@ -39,18 +39,22 @@ public class AmrsReportAdminExt extends AdministrationSectionExt {
 		Map<String, String> map = new LinkedHashMap<String, String>();
 		
 		if (Context.hasPrivilege(ReportingConstants.PRIV_VIEW_REPORTS)) {
-			map.put("module/amrsreports/queuedReport.list", "Manage AMRS Reports");
+			map.put("module/amrsreports/queuedReport.list", "AMRS Reports");
 		}
 
 		if (Context.hasPrivilege(PrivilegeConstants.VIEW_LOCATIONS)) {
-			map.put("module/amrsreports/cccNumbers.list", "Manage CCC Numbers");
-			map.put("module/amrsreports/facility.list", "Manage MOH Facilities");
+			map.put("module/amrsreports/cccNumbers.list", "CCC Numbers");
+			map.put("module/amrsreports/facility.list", "MOH Facilities");
 
 			if (Context.hasPrivilege(PrivilegeConstants.VIEW_USERS)) {
-				map.put("module/amrsreports/facilityPrivileges.form", "Manage User/Facility Privileges");
+				map.put("module/amrsreports/facilityPrivileges.form", "User/Facility Privileges");
 			}
 
-			map.put("/module/amrsreports/cohortCounts.list", "View Cohort Counts");
+			map.put("/module/amrsreports/cohortCounts.list", "Cohort Counts");
+		}
+
+		if (Context.hasPrivilege(PrivilegeConstants.VIEW_CONCEPTS)) {
+			map.put("/module/amrsreports/regimen.list", "ART Regimens");
 		}
 
 		if (Context.hasPrivilege(PrivilegeConstants.VIEW_GLOBAL_PROPERTIES)) {

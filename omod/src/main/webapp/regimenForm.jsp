@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/template/include.jsp" %>
 <%@ include file="/WEB-INF/template/header.jsp" %>
 
-<openmrs:require privilege="View Drugs" otherwise="/login.htm" redirect="/module/amrsreports/regimen.form"/>
+<openmrs:require privilege="View Concepts" otherwise="/login.htm" redirect="/module/amrsreports/regimen.form"/>
 
 <openmrs:htmlInclude file="/scripts/dojo/dojo.js" />
 <openmrs:htmlInclude file="/dwr/util.js" />
