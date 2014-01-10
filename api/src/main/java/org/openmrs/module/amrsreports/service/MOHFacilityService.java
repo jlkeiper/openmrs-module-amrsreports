@@ -58,4 +58,7 @@ public interface MOHFacilityService {
 
 	@Transactional(readOnly = true)
 	Map<Integer, String> getSerialNumberMapForFacility(MOHFacility facility);
+
+	@Transactional
+	public void unretireFacility(MOHFacility facility);
 }

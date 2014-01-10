@@ -45,13 +45,18 @@ public class UserFacilityServiceImpl implements UserFacilityService {
 
 	@Override
 	public List<MOHFacility> getAllowedFacilitiesForUser(User user) {
+		return getAllowedFacilitiesForUser(user, false);
+	}
+
+	@Override
+	public List<MOHFacility> getAllowedFacilitiesForUser(User user, Boolean includeRetired) {
 		if (user == null)
 			return Collections.emptyList();
 
 		if (user.hasRole(RoleConstants.SUPERUSER))
-			return Context.getService(MOHFacilityService.class).getAllFacilities();
+			return Context.getService(MOHFacilityService.class).getAllFacilities(includeRetired);
 
-		return dao.getAllowedFacilitiesForUser(user);
+		return dao.getAllowedFacilitiesForUser(user, includeRetired);
 	}
 
 	@Override

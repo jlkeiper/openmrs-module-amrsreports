@@ -46,10 +46,14 @@ public class HibernateUserFacilityDAO implements UserFacilityDAO {
 	}
 
 	@Override
-	public List<MOHFacility> getAllowedFacilitiesForUser(User user) {
+	public List<MOHFacility> getAllowedFacilitiesForUser(User user, Boolean includeRetired) {
 		Criteria c = sessionFactory.getCurrentSession().createCriteria(UserFacility.class)
 				.add(Restrictions.eq("user", user))
 				.setProjection(Projections.property("facility"));
+
+		if (includeRetired != null && !includeRetired) {
+			c.add(Restrictions.eq("retired", false));
+		}
 
 		return c.list();
 	}

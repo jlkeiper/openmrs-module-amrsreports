@@ -24,7 +24,7 @@ public class FacilityListController {
 	@ModelAttribute("facilities")
 	public List<MOHFacility> getAllFacilities() {
         User currentUser = Context.getAuthenticatedUser();
-        List<MOHFacility> relevantFacilities = Context.getService(UserFacilityService.class).getAllowedFacilitiesForUser(currentUser);
+        List<MOHFacility> relevantFacilities = Context.getService(UserFacilityService.class).getAllowedFacilitiesForUser(currentUser, true);
 
         return relevantFacilities;
 	}

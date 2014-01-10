@@ -148,6 +148,17 @@ public class MOHFacilityServiceImpl implements MOHFacilityService {
 		return dao.getSerialNumberMapForFacility(facility);
 	}
 
+	@Override
+	public void unretireFacility(MOHFacility facility) {
+		facility.setRetired(false);
+		facility.setRetiredBy(null);
+		facility.setDateRetired(null);
+		facility.setRetireReason(null);
+
+		dao.saveFacility(facility);
+
+	}
+
 
 	@Override
 	public Integer assignMissingIdentifiersForFacility(MOHFacility facility) {

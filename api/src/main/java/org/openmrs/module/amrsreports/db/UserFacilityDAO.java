@@ -19,7 +19,7 @@ public interface UserFacilityDAO {
 
 	public void purgeUserFacility(UserFacility userFacility);
 
-	public List<MOHFacility> getAllowedFacilitiesForUser(User user);
+	public List<MOHFacility> getAllowedFacilitiesForUser(User user, Boolean includeRetired);
 
 	public UserFacility getUserFacilityFor(User user, MOHFacility facility);
 }

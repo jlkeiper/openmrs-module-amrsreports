@@ -37,12 +37,20 @@ public interface UserFacilityService {
 	public void purgeUserFacility(UserFacility userFacility);
 
 	/**
-	 * Gets all Facilities linked to a given User
+	 * Gets all unvoided Facilities linked to a given User
 	 *
 	 * @should return an empty list if the user is null
 	 */
 	@Transactional(readOnly = true)
 	public List<MOHFacility> getAllowedFacilitiesForUser(User user);
+
+	/**
+	 * Gets all Facilities linked to a given User
+	 *
+	 * @should return an empty list if the user is null
+	 */
+	@Transactional(readOnly = true)
+	public List<MOHFacility> getAllowedFacilitiesForUser(User user, Boolean includeRetired);
 
 	/**
 	 * Returns whether a User has access to the given Facility

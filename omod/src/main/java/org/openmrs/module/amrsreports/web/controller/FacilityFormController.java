@@ -4,6 +4,7 @@ import org.openmrs.Location;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.amrsreports.MOHFacility;
+import org.openmrs.module.amrsreports.service.ARTRegimenService;
 import org.openmrs.module.amrsreports.service.MOHFacilityService;
 import org.openmrs.module.amrsreports.web.propertyeditor.LocationNameEditor;
 import org.openmrs.web.WebConstants;
@@ -96,14 +97,32 @@ public class FacilityFormController {
 				return EDIT_VIEW;
 			}
 
+			// get the object by id, since that is the only value coming from the form
+			facility = Context.getService(MOHFacilityService.class).getFacility(facility.getFacilityId());
+
 			service.retireFacility(facility, retireReason);
 			httpSession.setAttribute(WebConstants.OPENMRS_MSG_ATTR, "Facility successfully retired");
 
 			view = SUCCESS_VIEW;
 		}
 
+		// if the user is un-retiring out the EncounterType
+		else if (request.getParameter("unretire") != null) {
+
+			// get the object by id, since that is the only value coming from the form
+			facility = Context.getService(MOHFacilityService.class).getFacility(facility.getFacilityId());
+
+			service.unretireFacility(facility);
+			httpSession.setAttribute(WebConstants.OPENMRS_MSG_ATTR, "Facility successfully unretired");
+
+			view = SUCCESS_VIEW;
+		}
+
 		// if the user is purging the encounterType
 		else if (request.getParameter("purge") != null) {
+
+			// get the object by id, since that is the only value coming from the form
+			facility = Context.getService(MOHFacilityService.class).getFacility(facility.getFacilityId());
 
 			try {
 				service.purgeFacility(facility);
